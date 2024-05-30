@@ -128,7 +128,7 @@ fun MainMenuLayout(context: Context){
         ) {
             Text("High Scores")
         }
-        Spacer(modifier = Modifier.height(250.dp))
+        Spacer(modifier = Modifier.height(200.dp))
         Button(
             onClick = {
                 //val intent = Intent(context, SettingsActivity::class.java)
