@@ -128,12 +128,15 @@ fun MainMenuLayout(context: Context){
         ) {
             Text("High Scores")
         }
+        Spacer(modifier = Modifier.height(250.dp))
         Button(
             onClick = {
                 //val intent = Intent(context, SettingsActivity::class.java)
                 //startActivity(intent)
-            }
-        ) {
+            },
+            modifier = Modifier.size(width = 300.dp, height = 150.dp)
+        )
+        {
             Text("PLAY NOW")
         }
     }
