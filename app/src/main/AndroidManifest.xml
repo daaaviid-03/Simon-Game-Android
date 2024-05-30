@@ -24,6 +24,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".game.GameActivity" />
+        <activity android:name=".game.Settings" />
+        <activity android:name=".game.HighScores" />
     </application>
 
 </manifest>
