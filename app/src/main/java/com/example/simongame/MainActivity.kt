@@ -1,6 +1,7 @@
 package com.example.simongame
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -37,6 +38,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Box
+import androidx.core.content.ContextCompat.startActivity
+import com.example.simongame.game.GameActivity
 import com.example.simongame.ui.theme.SimonGameTheme
 
 class MainActivity : ComponentActivity() {
@@ -131,8 +134,8 @@ fun MainMenuLayout(context: Context){
         Spacer(modifier = Modifier.height(200.dp))
         Button(
             onClick = {
-                //val intent = Intent(context, SettingsActivity::class.java)
-                //startActivity(intent)
+                val intent = Intent(context, GameActivity::class.java)
+                startActivity(context, intent, null)
             },
             modifier = Modifier.size(width = 300.dp, height = 150.dp)
         )
