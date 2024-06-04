@@ -6,9 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 
-@Database(entities = [User::class, GameHistory::class], version = 1)
+@Database(entities = [GameHistory::class], version = 1)
 abstract class UsersDB : RoomDatabase() {
-    abstract fun userDao(): UserDAO
     abstract fun gameDao(): GameHistoryDAO
 
     companion object {
@@ -20,7 +19,7 @@ abstract class UsersDB : RoomDatabase() {
                     context.applicationContext,
                     UsersDB::class.java,
                     "app_database.db")
-                    .createFromAsset("databases/app_database.db")
+                    //.createFromAsset("databases/app_database.db")
                     .build()
             }
             return db!!

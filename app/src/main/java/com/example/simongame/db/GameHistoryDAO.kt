@@ -11,4 +11,7 @@ interface GameHistoryDAO {
 
     @Query("SELECT * FROM GameHistory WHERE difficultyLevel = :difficultyLevel ORDER BY duration DESC LIMIT 10")
     fun getTop10LongestGamesInDifficulty(difficultyLevel: Int): List<GameHistory>
+
+    @Query("SELECT DISTINCT userName FROM GameHistory ORDER BY date DESC LIMIT 5")
+    fun getLast5NamesFromRecords(): List<String>
 }

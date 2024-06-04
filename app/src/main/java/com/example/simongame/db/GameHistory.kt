@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class GameHistory(
     @PrimaryKey(autoGenerate = true) val id: Int,
-    val userId: Int,
+    val userName: String,
     val date: Long,
     val difficultyLevel: Int,
     val duration: Int

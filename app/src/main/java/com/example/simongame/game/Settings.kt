@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Slider
 import androidx.compose.ui.unit.sp
-import com.example.simongame.ConstantVal
 
 class Settings : ComponentActivity() {
     companion object {

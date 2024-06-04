@@ -9,13 +9,17 @@ import java.time.Instant
 
 class HistoryRepository(private val dao: GameHistoryDAO) {
 
-    fun insertGame(userId: Int, difficultyLevel: Int, duration: Int) {
-        val thisHist = GameHistory(0, userId, Instant.now().toEpochMilli(), difficultyLevel, duration)
+    fun insertGame(userName: String, difficultyLevel: Int, duration: Int) {
+        val thisHist = GameHistory(0, userName, Instant.now().toEpochMilli(), difficultyLevel, duration)
         dao.insertGame(thisHist)
     }
 
     fun getTop10(difficultyLevel: Int): List<GameHistory> {
         return dao.getTop10LongestGamesInDifficulty(difficultyLevel)
+    }
+
+    fun getLast5(): List<String> {
+        return dao.getLast5NamesFromRecords()
     }
 
 }

@@ -36,6 +36,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
     buildFeatures {
         compose = true
@@ -71,4 +72,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
     kapt(libs.androidx.room.compiler)
+
+    implementation(libs.androidx.compose.ui)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.1")
+
 }

@@ -1,6 +1,5 @@
 package com.example.simongame
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -17,45 +16,41 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import kotlinx.coroutines.delay
 import androidx.compose.material3.Text
-import android.widget.LinearLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import android.widget.ImageView
-import androidx.core.content.ContextCompat
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Box
 import androidx.core.content.ContextCompat.startActivity
 import com.example.simongame.game.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.simongame.ui.theme.SimonGameTheme
+import com.example.simongame2.dbimplementation.HistoryRepository
+import com.example.simongame2.dbimplementation.UsersDB
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val context = LocalContext.current
-            //val db = UsersDB.getInstance(context)
-            //val usersRep = UserRepository(db.userDao())
+
+
+
+            //usersRep.insertGame("David", 1, 5)
 
             //val sharedPreferences = getSharedPreferences("app_data", Context.MODE_PRIVATE)
             //sharedPreferences.edit().putInt("my_int_key", myIntValue).apply()
@@ -120,11 +115,11 @@ fun MainMenuLayout(context: Context) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            //Image(
-            //    modifier = Modifier.size(100.dp),
-            //    contentDescription = "UsersImage",
-            //    bitmap = userImage
-            //)
+//            LazyColumn(modifier = Modifier.weight(1f)) {
+//                items(usersRep.getLast5().size) { elemento ->
+//                    usersRep.getLast5()[elemento]
+//                }
+//            }
             Spacer(modifier = Modifier.height(50.dp))
             Image(
                 painter = painterResource(id = R.drawable.perfil),
