@@ -33,6 +33,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.example.simongame.game.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.size
+import android.media.MediaPlayer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ListItem
@@ -43,12 +44,14 @@ import com.example.simongame2.dbimplementation.HistoryRepository
 import com.example.simongame2.dbimplementation.UsersDB
 
 class MainActivity : ComponentActivity() {
+    private lateinit var mediaPlayer: MediaPlayer
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val context = LocalContext.current
-
-
+            val mediaPlayer = MediaPlayer.create(this, R.raw.audio)
+            mediaPlayer.isLooping = true
+            mediaPlayer.start()
 
             //usersRep.insertGame("David", 1, 5)
 
