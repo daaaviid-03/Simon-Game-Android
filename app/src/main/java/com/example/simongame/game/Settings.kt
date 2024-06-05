@@ -11,15 +11,12 @@ import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
-import com.example.simongame.game.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.AlertDialog
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.getValue
@@ -32,9 +29,9 @@ import android.content.SharedPreferences
 import com.example.simongame.ui.theme.SimonGameTheme
 import android.app.Activity
 import androidx.compose.ui.Alignment
-import android.app.AlertDialog
 import androidx.compose.material3.Slider
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.simongame.R
 
 class Settings : ComponentActivity() {
@@ -152,25 +149,36 @@ class Settings : ComponentActivity() {
     }
     @Composable
     fun ConfirmExitDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-        AlertDialog(
+        Dialog(
             onDismissRequest = { onDismiss() },
-            title = { Text("Confirmar salida") },
-            text = { Text("Tienes cambios sin confirmar. ¿Seguro que quieres salir?") },
-            confirmButton = {
-                Button(
-                    onClick = { onConfirm() }
+            content = {
+                Surface(
+                    modifier = Modifier
+                        .width(300.dp)
+                        .padding(16.dp),
                 ) {
-                    Text("Sí")
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("Confirmar salida")
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Tienes cambios sin confirmar. ¿Seguro que quieres salir?")
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Button(onClick = { onConfirm() }) {
+                                Text("Sí")
+                            }
+                            Button(onClick = { onDismiss() }) {
+                                Text("No")
+                            }
+                        }
+                    }
                 }
-            },
-            dismissButton = {
-                Button(
-                    onClick = { onDismiss() }
-                ) {
-                    Text("No")
-                }
-            },
-            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+            }
         )
     }
 }
