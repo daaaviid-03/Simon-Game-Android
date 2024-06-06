@@ -1,4 +1,4 @@
-package com.example.simongame2.dbimplementation
+package com.example.simongame.db
 
 import android.content.Context
 import androidx.room.Database
@@ -7,19 +7,20 @@ import androidx.room.RoomDatabase
 
 
 @Database(entities = [GameHistory::class], version = 1)
-abstract class UsersDB : RoomDatabase() {
-    abstract fun gameDao(): GameHistoryDAO
+abstract class GamesHistoryDB : RoomDatabase() {
+    abstract fun gameHistoryDAO(): GameHistoryDAO
 
     companion object {
-        private var db: UsersDB? = null
+        private var db: GamesHistoryDB? = null
 
-        fun getInstance(context: Context): UsersDB {
+        fun getInstance(context: Context): GamesHistoryDB {
             if (db == null) {
                 db = Room.databaseBuilder(
                     context.applicationContext,
-                    UsersDB::class.java,
-                    "app_database.db")
-                    //.createFromAsset("databases/app_database.db")
+                    GamesHistoryDB::class.java,
+                    "games_history.db"
+                )
+                    .createFromAsset("games_history.db")
                     .build()
             }
             return db!!

@@ -41,7 +41,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Done
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -50,7 +49,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -71,8 +69,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.simongame2.dbimplementation.HistoryRepository
-import com.example.simongame2.dbimplementation.UsersDB
+import com.example.simongame.db.HistoryRepository
+import com.example.simongame.db.GamesHistoryDB
 import kotlinx.coroutines.delay
 
 class GameActivity : ComponentActivity() {
@@ -106,8 +104,8 @@ class GameActivity : ComponentActivity() {
                 factory = GameCountDownTimerViewModelFactory(context.applicationContext as Application)
             )
 
-            val db = UsersDB.getInstance(context)
-            val histRep = HistoryRepository(db.gameDao())
+            val db = GamesHistoryDB.getInstance(context)
+            val histRep = HistoryRepository(db.gameHistoryDAO())
 
             SimonGameTheme {
                 // A surface container using the 'background' color from the theme
@@ -150,7 +148,7 @@ fun BackgroundLayout(
         }
         else -> {
             EndGameActivity(histRep, sequenceLen, difficulty) {
-                //histRep.insertGame(it, difficulty, sequenceLen)
+                histRep.insertGame(it, difficulty, sequenceLen)
                 (context as Activity).finish()
             }
         }
@@ -165,8 +163,8 @@ fun EndGameActivity(
     onclick: (name: String) -> Unit
 ) {
 
-    //val recentRecordNames = histRep.getLast5()
-    val recentRecordNames = mutableListOf("David", "Carlos", "Bruno", "Lucia", "Carolina")
+    val recentRecordNames = histRep.getLast5()
+    //val recentRecordNames = mutableListOf("David", "Carlos", "Bruno", "Lucia", "Carolina")
 
     val userName: MutableState<String> = rememberSaveable { mutableStateOf("") }
 

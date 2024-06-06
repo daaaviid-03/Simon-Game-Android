@@ -1,4 +1,4 @@
-package com.example.simongame2.dbimplementation
+package com.example.simongame.db
 
 import androidx.room.Insert
 import androidx.room.Query

@@ -1,4 +1,4 @@
-package com.example.simongame2.dbimplementation
+package com.example.simongame.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

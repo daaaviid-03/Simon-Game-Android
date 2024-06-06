@@ -39,8 +39,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.simongame.ui.theme.SimonGameTheme
-import com.example.simongame2.dbimplementation.HistoryRepository
-import com.example.simongame2.dbimplementation.UsersDB
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
