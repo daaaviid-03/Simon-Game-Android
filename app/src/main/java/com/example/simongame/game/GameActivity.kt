@@ -163,7 +163,8 @@ fun EndGameActivity(
     onclick: (name: String) -> Unit
 ) {
 
-    val recentRecordNames = histRep.getLast5()
+    val recentRecordNames by rememberSaveable { mutableStateOf(histRep.getLast5()) }
+
     //val recentRecordNames = mutableListOf("David", "Carlos", "Bruno", "Lucia", "Carolina")
 
     val userName: MutableState<String> = rememberSaveable { mutableStateOf("") }
