@@ -69,7 +69,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.simongame.db.HistoryRepository
+import com.example.simongame.db.DBViewModel
+import com.example.simongame.db.DBViewModelFactory
 import com.example.simongame.db.GamesHistoryDB
 import kotlinx.coroutines.delay
 
@@ -104,8 +105,9 @@ class GameActivity : ComponentActivity() {
                 factory = GameCountDownTimerViewModelFactory(context.applicationContext as Application)
             )
 
-            val db = GamesHistoryDB.getInstance(context)
-            val histRep = HistoryRepository(db.gameHistoryDAO())
+            val dbVM: DBViewModel = viewModel(
+                factory = DBViewModelFactory(context.applicationContext as Application)
+            )
 
             SimonGameTheme {
                 // A surface container using the 'background' color from the theme
@@ -114,7 +116,7 @@ class GameActivity : ComponentActivity() {
                     color =  MaterialTheme.colorScheme.background
                 ) {
                     state = 0
-                    BackgroundLayout(context, vm, timerVM, histRep)
+                    BackgroundLayout(context, vm, timerVM, dbVM)
                 }
             }
         }
@@ -126,7 +128,7 @@ fun BackgroundLayout(
     context: Context,
     vm: GameViewModel,
     timerVM: GameCountDownTimerViewModel,
-    histRep: HistoryRepository
+    dbVM: DBViewModel
 ){
     var difficulty by rememberSaveable { mutableIntStateOf(0) }
     var state by rememberSaveable { mutableIntStateOf(GameActivity.state) }
@@ -147,8 +149,8 @@ fun BackgroundLayout(
             }
         }
         else -> {
-            EndGameActivity(histRep, sequenceLen, difficulty) {
-                histRep.insertGame(it, difficulty, sequenceLen)
+            EndGameActivity(dbVM, sequenceLen, difficulty) {
+                dbVM.insertGame(it, difficulty, sequenceLen)
                 (context as Activity).finish()
             }
         }
@@ -157,15 +159,21 @@ fun BackgroundLayout(
 
 @Composable
 fun EndGameActivity(
-    histRep: HistoryRepository,
+    dbVM: DBViewModel,
     sequenceLen: Int,
     difficulty: Int,
     onclick: (name: String) -> Unit
 ) {
 
-    val recentRecordNames by rememberSaveable { mutableStateOf(histRep.getLast5()) }
+    var recentRecordNames by rememberSaveable {
+        mutableStateOf(
+            listOf<String>()
+        )
+    }
 
-    //val recentRecordNames = mutableListOf("David", "Carlos", "Bruno", "Lucia", "Carolina")
+    dbVM.last5Names.observe(LocalContext.current as ComponentActivity) {
+        recentRecordNames = it!!
+    }
 
     val userName: MutableState<String> = rememberSaveable { mutableStateOf("") }
 
@@ -212,7 +220,7 @@ fun FilterMe(userName: MutableState<String>, onclick: (userNameStr: String) -> U
             userName.value = it
         },
         placeholder = {
-            Text(text = "Filter")
+            Text(text = "Nickname")
         },
         modifier = Modifier
             .padding(8.dp)

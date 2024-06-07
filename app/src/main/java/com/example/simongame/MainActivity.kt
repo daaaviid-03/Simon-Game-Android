@@ -89,27 +89,6 @@ fun MainMenuLayout(context: Context) {
         //else
         //    ImageBitmap.imageResource(R.drawable.ic_launcher_foreground)
         //val userName = thisUser?.userName ?: "unknown"
-        Box(
-            modifier = Modifier
-                .size(300.dp)
-                .padding(16.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.diamante),
-                contentDescription = "diamante",
-                modifier = Modifier
-                    .fillMaxWidth(0.1f)
-                    .aspectRatio(1f),
-                alignment = Alignment.Center
-            )
-            Text(
-                text = "cantidad ",
-                color = Color.Black,
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .padding(start = 40.dp)
-            )
-        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()

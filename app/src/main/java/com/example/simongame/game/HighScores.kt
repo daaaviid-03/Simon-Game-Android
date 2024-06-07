@@ -1,12 +1,11 @@
 package com.example.simongame.game
 
-import android.content.Context
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,15 +21,40 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Slider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.simongame.LEVEL_NAME
+import com.example.simongame.NUMBER_OF_LEVELS
+import com.example.simongame.db.DBViewModel
+import com.example.simongame.db.DBViewModelFactory
+import com.example.simongame.db.GameHistory
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class HighScores : ComponentActivity() {
-    data class ExerciseResult(val username: String, val score: Int)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
+            val context = LocalContext.current
+
+            val dbVM: DBViewModel = viewModel(
+                factory = DBViewModelFactory(context.applicationContext as Application)
+            )
 
             SimonGameTheme {
                 // A surface container using the 'background' color from the theme
@@ -38,25 +62,34 @@ class HighScores : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
-                    ResultsScreen(results = generateSampleResults())
+                    ResultsScreen(dbVM)
                 }
             }
         }
     }
-
-    private fun generateSampleResults(): List<ExerciseResult> {
-        // Generar resultados simulados
-        return listOf(
-            ExerciseResult("Usuario 1", 100),
-            ExerciseResult("Usuario 2", 90),
-            ExerciseResult("Usuario 3", 80),
-            // Agregar más resultados según sea necesario
-        )
-    }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun ResultsScreen(results: List<ExerciseResult>) {
+    fun ResultsScreen(dbVM: DBViewModel) {
+
+        var thisDifficulty by rememberSaveable { mutableIntStateOf(1) }
+
+        var top10Records by rememberSaveable { mutableStateOf(listOf<GameHistory>()) }
+
+        val onDiffChanged: () -> Unit = {
+            top10Records = dbVM.best10Games.value!![thisDifficulty - 1]
+        }
+
+        dbVM.best10Games.observe(this) {
+            onDiffChanged()
+        }
+
+        onDiffChanged()
+
+
+        val difficultyRange = 1f..NUMBER_OF_LEVELS.toFloat()
+
+
+
         Box(
             modifier = Modifier
                 .size(300.dp)
@@ -71,36 +104,85 @@ class HighScores : ComponentActivity() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(100.dp))
             Text(
-                text = "Mejores Resultados",
+                text = "High Scores",
                 modifier = Modifier.padding(bottom = 16.dp)
             )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Difficulty: ${LEVEL_NAME[thisDifficulty - 1].uppercase()}",
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Slider(
+                value = thisDifficulty.toFloat(),
+                onValueChange = {
+                    thisDifficulty = it.toInt()
+                    onDiffChanged()
+                },
+                valueRange = difficultyRange,
+                steps = NUMBER_OF_LEVELS - 1,
 
-            LazyColumn(
-                modifier = Modifier.weight(1f)
-            ) {
-                items(results) { result ->
-                    ResultItem(result = result)
+                modifier = Modifier
+                    .size(width = 300.dp, height = 30.dp)
+                    .height(50.dp)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(top10Records.size) {
+                    ResultItem(it, top10Records[it])
                 }
             }
         }
     }
 
     @Composable
-    fun ResultItem(result: ExerciseResult) {
+    fun ResultItem(position: Int, gameHistory: GameHistory) {
         Card(
             modifier = Modifier.padding(8.dp)
         ) {
-            Column(
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(16.dp)
-            ) {
-                Text(text = "Usuario: ${result.username}")
-                Text(text = "Puntuación: ${result.score}")
+            ){
+                Text(
+                    text = "${position + 1}. ",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 30.sp
+                )
+                Column(
+                    //modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Nickname: ${gameHistory.userName}")
+                    Text(text = "Difficulty: ${gameHistory.difficultyLevel}")
+                    Text(text = "Date: ${formatDate(gameHistory.date)}")
+                }
+
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ){
+                    Text(
+                        text = "${gameHistory.duration}",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 30.sp
+                    )
+                }
+
+
             }
+
         }
     }
+}
+
+fun formatDate(epochMilliseconds: Long): String {
+    val date = Date(epochMilliseconds)
+    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+    return formatter.format(date)
 }
 
