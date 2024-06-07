@@ -28,10 +28,6 @@ class GameCountDownTimerViewModel(private var app: Application): AndroidViewMode
     fun stopTimer() {
         isTimerStopped.postValue(true)
     }
-    fun restartTimer() {
-        isTimerStopped.postValue(false)
-        startNewTimer(actualTimeRemaining.value!!)
-    }
     private fun executeTimer() {
         CoroutineScope(Dispatchers.IO).launch {
             while (!isTimerStopped.value!! && Instant.now().toEpochMilli() < timerEndTime) {

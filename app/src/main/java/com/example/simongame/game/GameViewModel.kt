@@ -14,6 +14,8 @@ class GameViewModel(private var app: Application): AndroidViewModel(app) {
     var buttonTriggers = MutableLiveData<MutableList<Boolean>>(mutableListOf())
     var buttonsDisabled = MutableLiveData(false)
 
+    var gameButtonStates = MutableLiveData(MutableList(4){false})
+
     private var currentSequenceIndex = MutableLiveData(0)
     private var numberOfButtons: Int = 4
 

@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -28,24 +27,29 @@ import androidx.compose.ui.Modifier
 import android.content.SharedPreferences
 import com.example.simongame.ui.theme.SimonGameTheme
 import android.app.Activity
+import android.app.AlertDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.Slider
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.simongame.R
+import com.example.simongame.BOARD_SHAPE_INDEX_KEY
+import com.example.simongame.ConfirmExitDialogInformationSettings
+import com.example.simongame.MUSIC_LEVEL_KEY
+import com.example.simongame.SOUND_LEVEL_KEY
+import com.example.simongame.SimonButtonShapeIcons
+import com.example.simongame.SimonColorRed
+import com.example.simongame.confirmExitDialog
 
 class Settings : ComponentActivity() {
-    private lateinit var audioManager: AudioManager
-    private lateinit var sharedPreferences: SharedPreferences
 
     companion object {
-        private const val IMAGE_INDEX_KEY = "image_index"
+        lateinit var sharedPreferences: SharedPreferences
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-        sharedPreferences = getPreferences(Context.MODE_PRIVATE)
+        sharedPreferences = getSharedPreferences("SimonGame_Preferences", Context.MODE_PRIVATE)
         setContent {
             val context = LocalContext.current
             SimonGameTheme {
@@ -59,126 +63,116 @@ class Settings : ComponentActivity() {
             }
         }
     }
+}
 
-    @Composable
-    fun Background(context : Context) {
-        var imageIndex by remember { mutableStateOf(sharedPreferences.getInt(IMAGE_INDEX_KEY, 0)) }
-        var isChangesApplied by remember { mutableStateOf(false) }
-        val imageList = listOf(R.drawable.board1, R.drawable.board2, R.drawable.board3)
-        var showDialog by remember { mutableStateOf(false) }
-        if (showDialog) {
-            ConfirmExitDialog(
-                onConfirm = {
-                    showDialog = false
-                    finish() // Cerrar la actividad si se confirman los cambios
-                },
-                onDismiss = {
-                    showDialog = false // Solo cerrar el diálogo si se cancela la confirmación
-                }
-            )
-        }
-        val currentVolume =
-            remember { mutableStateOf(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)) }
-        Box(
-            modifier = Modifier
-                .size(300.dp)
-                .padding(16.dp)
+fun exitWithoutSaving(context: Context){
+    (context as Activity).finish()
+}
+
+@Composable
+fun Background(context: Context) {
+
+    val boardShapes = SimonButtonShapeIcons
+
+    val boardShapeIndex: MutableIntState = remember {
+        mutableIntStateOf(
+            Settings.sharedPreferences.getInt(BOARD_SHAPE_INDEX_KEY, 0)
+        )
+    }
+
+    val currentMusicVolume: MutableIntState = remember {
+        mutableIntStateOf(
+            Settings.sharedPreferences.getInt(MUSIC_LEVEL_KEY, 100)
+        )
+    }
+
+    val currentSoundVolume: MutableIntState = remember {
+        mutableIntStateOf(
+            Settings.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
+        )
+    }
+
+    Column {
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
         ) {
             Button(
                 onClick = {
-                    if (isChangesApplied) {
-                        (context as Activity).finish()
-                    } else {
-                        showDialog = true // Mostrar el diálogo de confirmación si hay cambios sin confirmar
-                    }
-                }
+                    confirmExitDialog(context, ConfirmExitDialogInformationSettings)
+                },
+                modifier = Modifier.padding(16.dp)
             )
             {
                 Text(text = "◀")
             }
+            Text("Settings", fontSize = 40.sp, modifier = Modifier.padding(16.dp))
         }
-        Column(modifier = Modifier.padding(16.dp)) {
-            Spacer(modifier = Modifier.height(100.dp))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Music:", fontSize = 25.sp)
+            Slider(
+                value = currentMusicVolume.intValue.toFloat(),
+                onValueChange = {
+                    currentMusicVolume.intValue = it.toInt()
+                },
+                valueRange = 0f..100f,
+                steps = 101
+            )
             Text("Sound:", fontSize = 25.sp)
             Slider(
-                value = currentVolume.value.toFloat(),
-                onValueChange = { newValue ->
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newValue.toInt(), 0)
-                    currentVolume.value = newValue.toInt()
+                value = currentSoundVolume.intValue.toFloat(),
+                onValueChange = {
+                    currentSoundVolume.intValue = it.toInt()
                 },
-                valueRange = 0f..audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-                    .toFloat(),
-                steps = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                valueRange = 0f..100f,
+                steps = 101
             )
             Spacer(modifier = Modifier.height(50.dp))
             Text("Board:", fontSize = 25.sp)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Button(onClick = {
-                    imageIndex = if (imageIndex > 0) imageIndex - 1 else imageList.size - 1
-                    isChangesApplied = false // Indica que se han realizado cambios sin confirmar
-                }) {
-                    Text("<-")
-                }
-                Image(
-                    painter = painterResource(id = imageList[imageIndex]),
-                    contentDescription = null,
-                    modifier = Modifier.size(225.dp)
-                )
-                Button(onClick = {
-                    imageIndex = (imageIndex + 1) % imageList.size
-                    isChangesApplied = false
-                }
-                ) {
-                    Text("->")
-                }
-            }
-                Spacer(modifier = Modifier.height(100.dp))
                 Button(
                     onClick = {
-                        sharedPreferences.edit()
-                            .putInt(IMAGE_INDEX_KEY, imageIndex) // Guardar el índice de la imagen
-                            .apply()
-                        isChangesApplied = true
-                        (context as Activity).finish()
-                         },
-                    enabled = !isChangesApplied // Deshabilitar el botón si no hay cambios sin confirmar
+                        boardShapeIndex.intValue = (boardShapeIndex.intValue - 1) % boardShapes.size
+                    }
                 ) {
-                    Text("Confirmar cambios")
+                    Text("◀")
+                }
+                Image(
+                    painter = painterResource(id = boardShapes[boardShapeIndex.intValue]),
+                    contentDescription = null,
+                    modifier = Modifier.size(225.dp).padding(20.dp),
+                    colorFilter = ColorFilter.tint(SimonColorRed)
+                )
+                Button(
+                    onClick = {
+                        boardShapeIndex.intValue = (boardShapeIndex.intValue + 1) % boardShapes.size
+                    }
+                ) {
+                    Text("▶")
+                }
+            }
+            Spacer(modifier = Modifier.height(100.dp))
+            Button(
+                onClick = {
+                    saveAndExit(context, boardShapeIndex.intValue, currentMusicVolume.intValue, currentSoundVolume.intValue)
+                },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Save", fontSize = 40.sp)
             }
         }
     }
-    @Composable
-    fun ConfirmExitDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-        Dialog(
-            onDismissRequest = { onDismiss() },
-            content = {
-                Surface(
-                    modifier = Modifier
-                        .width(300.dp)
-                        .padding(16.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("Confirmar salida")
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("Tienes cambios sin confirmar. ¿Seguro que quieres salir?")
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Button(onClick = { onConfirm() }) {
-                                Text("Sí")
-                            }
-                            Button(onClick = { onDismiss() }) {
-                                Text("No")
-                            }
-                        }
-                    }
-                }
-            }
-        )
-    }
+}
+
+fun saveAndExit(context: Context, boardShapeIndex: Int, musicVolume: Int, soundVolume: Int){
+    Settings.sharedPreferences.edit()
+        .putInt(BOARD_SHAPE_INDEX_KEY, boardShapeIndex)
+        .putInt(MUSIC_LEVEL_KEY, musicVolume)
+        .putInt(SOUND_LEVEL_KEY, soundVolume)
+        .apply()
+    exitWithoutSaving(context)
 }

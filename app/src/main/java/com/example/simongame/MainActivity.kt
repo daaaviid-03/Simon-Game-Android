@@ -22,23 +22,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.*
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.Box
 import androidx.core.content.ContextCompat.startActivity
 import com.example.simongame.game.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.size
 import android.media.MediaPlayer
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.toArgb
 import com.example.simongame.ui.theme.SimonGameTheme
 
 class MainActivity : ComponentActivity() {
@@ -75,75 +73,64 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainMenuLayout(context: Context) {
-        val colors = listOf(Color.Red, Color.Green, Color.Yellow, Color.Blue)
-        var currentIndex by remember { mutableStateOf(0) }
+    val colors = SIMON_COLOR_LIST
+    var currentIndex by remember { mutableIntStateOf(0) }
 
-        LaunchedEffect(Unit) {
-            while (true) {
-                currentIndex = (currentIndex + 1) % colors.size
-                delay(1000) // Cambiar cada segundo
-            }
-        }
-        //val userImage = if (thisUser != null)
-        //    ImageBitmap.imageResource(R.drawable.ic_launcher_foreground)
-        //else
-        //    ImageBitmap.imageResource(R.drawable.ic_launcher_foreground)
-        //val userName = thisUser?.userName ?: "unknown"
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-//            LazyColumn(modifier = Modifier.weight(1f)) {
-//                items(usersRep.getLast5().size) { elemento ->
-//                    usersRep.getLast5()[elemento]
-//                }
-//            }
-            Spacer(modifier = Modifier.height(50.dp))
-            Image(
-                painter = painterResource(id = R.drawable.perfil),
-                contentDescription = "Your Image",
-                modifier = Modifier
-                    .fillMaxWidth(0.45f)
-                    .aspectRatio(1f),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.height(50.dp))
-            Button(
-                modifier = Modifier.size(width = 250.dp, height = 50.dp,),
-                onClick = {
-                    val intent = Intent(context, Settings::class.java)
-                    startActivity(context, intent, null)
-                }
-            ) {
-                Text("Settings", fontSize = 25.sp)
-            }
-            Spacer(modifier = Modifier.height(30.dp))
-            Button(
-                modifier = Modifier.size(width = 250.dp, height = 50.dp),
-                onClick = {
-                    val intent = Intent(context, HighScores::class.java)
-                    startActivity(context, intent, null)
-                }
-            ) {
-                Text(
-                    text = "High Scores",
-                    fontSize = 25.sp
-                )
-            }
-            Spacer(modifier = Modifier.height(150.dp))
-            Button(
-                onClick = {
-                    val intent = Intent(context, GameActivity::class.java)
-                    startActivity(context, intent, null)
-                },
-                modifier = Modifier
-                    .size(width = 300.dp, height = 150.dp),
-                colors = ButtonDefaults.buttonColors(colors[currentIndex]),
-            )
-            {
-                Text("PLAY NOW", fontSize = 40.sp)
-            }
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentIndex = (currentIndex + 1) % colors.size
+            delay(3000)
         }
     }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(50.dp))
+        Icon(
+            Icons.Rounded.Person,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth(0.45f)
+                .aspectRatio(1f),
+        )
+        Spacer(modifier = Modifier.height(50.dp))
+        Button(
+            modifier = Modifier.size(width = 250.dp, height = 50.dp,),
+            onClick = {
+                val intent = Intent(context, Settings::class.java)
+                startActivity(context, intent, null)
+            }
+        ) {
+            Text("Settings", fontSize = 25.sp)
+        }
+        Spacer(modifier = Modifier.height(30.dp))
+        Button(
+            modifier = Modifier.size(width = 250.dp, height = 50.dp),
+            onClick = {
+                val intent = Intent(context, HighScores::class.java)
+                startActivity(context, intent, null)
+            }
+        ) {
+            Text(
+                text = "High Scores",
+                fontSize = 25.sp
+            )
+        }
+        Spacer(modifier = Modifier.height(150.dp))
+        Button(
+            onClick = {
+                val intent = Intent(context, GameActivity::class.java)
+                startActivity(context, intent, null)
+            },
+            modifier = Modifier
+                .size(width = 300.dp, height = 150.dp),
+            colors = ButtonDefaults.buttonColors(colors[currentIndex]),
+        )
+        {
+            Text("PLAY NOW", fontSize = 40.sp, color = invertColor(colors[currentIndex]))
+        }
+    }
+}
