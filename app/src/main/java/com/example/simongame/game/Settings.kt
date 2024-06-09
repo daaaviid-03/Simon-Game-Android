@@ -42,6 +42,7 @@ import com.example.simongame.SimonColorRed
 import com.example.simongame.confirmExitDialog
 
 class Settings : ComponentActivity() {
+    private lateinit var audioManager: AudioManager
 
     companion object {
         lateinit var sharedPreferences: SharedPreferences
@@ -49,130 +50,137 @@ class Settings : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         sharedPreferences = getSharedPreferences("SimonGame_Preferences", Context.MODE_PRIVATE)
         setContent {
             val context = LocalContext.current
             SimonGameTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Background(context)
+                    Background(context, audioManager)
                 }
             }
         }
     }
 }
 
-fun exitWithoutSaving(context: Context){
-    (context as Activity).finish()
-}
 
-@Composable
-fun Background(context: Context) {
-
-    val boardShapes = SimonButtonShapeIcons
-
-    val boardShapeIndex: MutableIntState = remember {
-        mutableIntStateOf(
-            Settings.sharedPreferences.getInt(BOARD_SHAPE_INDEX_KEY, 0)
-        )
+    fun exitWithoutSaving(context: Context) {
+        (context as Activity).finish()
     }
 
-    val currentMusicVolume: MutableIntState = remember {
-        mutableIntStateOf(
-            Settings.sharedPreferences.getInt(MUSIC_LEVEL_KEY, 100)
-        )
-    }
+    @Composable
+    fun Background(context: Context,audioManager: AudioManager) {
 
-    val currentSoundVolume: MutableIntState = remember {
-        mutableIntStateOf(
-            Settings.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
-        )
-    }
+        val boardShapes = SimonButtonShapeIcons
 
-    Column {
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Button(
-                onClick = {
-                    confirmExitDialog(context, ConfirmExitDialogInformationSettings)
-                },
+        val boardShapeIndex: MutableIntState = remember {
+            mutableIntStateOf(
+                Settings.sharedPreferences.getInt(BOARD_SHAPE_INDEX_KEY, 0)
+            )
+        }
+
+        val currentMusicVolume =
+            remember { mutableIntStateOf(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)) }
+
+        val currentSoundVolume: MutableIntState = remember {
+            mutableIntStateOf(
+                Settings.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
+            )
+        }
+
+        Column {
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(16.dp)
-            )
-            {
-                Text(text = "◀")
-            }
-            Text("Settings", fontSize = 40.sp, modifier = Modifier.padding(16.dp))
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text("Music:", fontSize = 25.sp)
-            Slider(
-                value = currentMusicVolume.intValue.toFloat(),
-                onValueChange = {
-                    currentMusicVolume.intValue = it.toInt()
-                },
-                valueRange = 0f..100f,
-                steps = 101
-            )
-            Text("Sound:", fontSize = 25.sp)
-            Slider(
-                value = currentSoundVolume.intValue.toFloat(),
-                onValueChange = {
-                    currentSoundVolume.intValue = it.toInt()
-                },
-                valueRange = 0f..100f,
-                steps = 101
-            )
-            Spacer(modifier = Modifier.height(50.dp))
-            Text("Board:", fontSize = 25.sp)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Button(
-                    onClick = {
-                        boardShapeIndex.intValue = (boardShapeIndex.intValue - 1) % boardShapes.size
-                    }
-                ) {
-                    Text("◀")
-                }
-                Image(
-                    painter = painterResource(id = boardShapes[boardShapeIndex.intValue]),
-                    contentDescription = null,
-                    modifier = Modifier.size(225.dp).padding(20.dp),
-                    colorFilter = ColorFilter.tint(SimonColorRed)
-                )
-                Button(
-                    onClick = {
-                        boardShapeIndex.intValue = (boardShapeIndex.intValue + 1) % boardShapes.size
-                    }
-                ) {
-                    Text("▶")
-                }
-            }
-            Spacer(modifier = Modifier.height(100.dp))
-            Button(
-                onClick = {
-                    saveAndExit(context, boardShapeIndex.intValue, currentMusicVolume.intValue, currentSoundVolume.intValue)
-                },
-                modifier = Modifier.align(Alignment.End)
             ) {
-                Text("Save", fontSize = 40.sp)
+                Button(
+                    onClick = {
+                        confirmExitDialog(context, ConfirmExitDialogInformationSettings)
+                    },
+                    modifier = Modifier.padding(16.dp)
+                )
+                {
+                    Text(text = "◀")
+                }
+                Text("Settings", fontSize = 40.sp, modifier = Modifier.padding(16.dp))
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Music:", fontSize = 25.sp)
+                Slider(
+                    value = currentMusicVolume.intValue.toFloat(),
+                    onValueChange = { newValue ->
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newValue.toInt(), 0)
+                        currentMusicVolume.intValue = newValue.toInt()
+                    },
+                    valueRange = 0f..audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                        .toFloat(),
+                    steps = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                )
+                Text("Sound:", fontSize = 25.sp)
+                Slider(
+                    value = currentSoundVolume.intValue.toFloat(),
+                    onValueChange = {
+                        currentSoundVolume.intValue = it.toInt()
+                    },
+                    valueRange = 0f..100f,
+                    steps = 101
+                )
+                Spacer(modifier = Modifier.height(50.dp))
+                Text("Board:", fontSize = 25.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Button(
+                        onClick = {
+                            boardShapeIndex.intValue =
+                                (boardShapeIndex.intValue - 1) % boardShapes.size
+                        }
+                    ) {
+                        Text("◀")
+                    }
+                    Image(
+                        painter = painterResource(id = boardShapes[boardShapeIndex.intValue]),
+                        contentDescription = null,
+                        modifier = Modifier.size(225.dp).padding(20.dp),
+                        colorFilter = ColorFilter.tint(SimonColorRed)
+                    )
+                    Button(
+                        onClick = {
+                            boardShapeIndex.intValue =
+                                (boardShapeIndex.intValue + 1) % boardShapes.size
+                        }
+                    ) {
+                        Text("▶")
+                    }
+                }
+                Spacer(modifier = Modifier.height(80.dp))
+                Button(
+                    onClick = {
+                        saveAndExit(
+                            context,
+                            boardShapeIndex.intValue,
+                            currentMusicVolume.intValue,
+                            currentSoundVolume.intValue
+                        )
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Save", fontSize = 30.sp)
+                }
             }
         }
     }
-}
 
-fun saveAndExit(context: Context, boardShapeIndex: Int, musicVolume: Int, soundVolume: Int){
-    Settings.sharedPreferences.edit()
-        .putInt(BOARD_SHAPE_INDEX_KEY, boardShapeIndex)
-        .putInt(MUSIC_LEVEL_KEY, musicVolume)
-        .putInt(SOUND_LEVEL_KEY, soundVolume)
-        .apply()
-    exitWithoutSaving(context)
-}
+    fun saveAndExit(context: Context, boardShapeIndex: Int, musicVolume: Int, soundVolume: Int) {
+        Settings.sharedPreferences.edit()
+            .putInt(BOARD_SHAPE_INDEX_KEY, boardShapeIndex)
+            .putInt(MUSIC_LEVEL_KEY, musicVolume)
+            .putInt(SOUND_LEVEL_KEY, soundVolume)
+            .apply()
+        exitWithoutSaving(context)
+    }

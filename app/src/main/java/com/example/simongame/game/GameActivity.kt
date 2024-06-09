@@ -1,5 +1,6 @@
 package com.example.simongame.game
 
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
@@ -29,6 +30,8 @@ import com.example.simongame.ui.theme.SimonGameTheme
 import android.app.Activity
 import android.app.Application
 import android.content.SharedPreferences
+import android.os.Looper
+import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -81,6 +84,8 @@ import com.example.simongame.confirmExitDialog
 import com.example.simongame.db.DBViewModel
 import com.example.simongame.db.DBViewModelFactory
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import java.util.logging.Handler
 
 class GameActivity : ComponentActivity() {
 
@@ -456,8 +461,6 @@ fun PlayGameActivity(
             }
         }
     }
-
-
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -524,6 +527,7 @@ private fun pauseGame(vm: GameViewModel) {
         vm.postNewGameState(GameState.Pause)
     }
 }
+@Composable
 fun ObserveViewModels(
     vm: GameViewModel,
     timerVM: GameCountDownTimerViewModel,
@@ -559,6 +563,7 @@ fun ObserveViewModels(
                 timerVM.stopTimer()
                 timerVM.actualTimeRemaining.postValue((LEVEL_MAX_RESPONSE_TIME_SEC[difficulty - 1] * 1000).toLong())
                 showSequence(vm, context, LEVEL_VELOCITY_SEC[difficulty - 1], gameButtonsStates)
+
             }
             GameState.GameOver -> {
                 timerVM.stopTimer()
@@ -573,21 +578,21 @@ fun ObserveViewModels(
         }
     }
 }
+
 fun showSequence(vm: GameViewModel, context: Context, timeToShowStep: Float, gameButtonsStates: MutableState<MutableList<Boolean>>) {
+        val timeToWaitBetween =  (timeToShowStep/2 * 1000).toLong()
     CoroutineScope(Dispatchers.IO).launch {
-        val timeToWaitBetween = (timeToShowStep/2 * 1000).toLong()
-        for (i in vm.sequence.value!!.iterator()) {
-            if(vm.gameState.value == GameState.Showing) {
-                delay(timeToWaitBetween)
-                gameButtonsStates.value[i] = true
-                delay(200L)
-                gameButtonsStates.value[i] = false
-                //animButton(gameButtonsStates, i)
-                delay(timeToWaitBetween)
+        vm.sequence.value?.let { sequence ->
+            for (i in sequence) {
+                if (vm.gameState.value == GameState.Showing) {
+                    delay(timeToWaitBetween)
+                    animButton(gameButtonsStates, i)
+                    delay(timeToWaitBetween)
+                }
             }
-        }
-        if(vm.gameState.value == GameState.Showing) {
-            vm.postNewGameState(GameState.NextStep)
+            if (vm.gameState.value == GameState.Showing) {
+                vm.postNewGameState(GameState.NextStep)
+            }
         }
     }
 }
@@ -627,7 +632,7 @@ fun simonButtonPressed(
     buttonId: Int,
     gameButtonsStates: MutableState<MutableList<Boolean>>
 ){
-    if (vm.gameState.value!! == GameState.ListeningStep) {
+    if (vm.gameState.value!! == GameState.ListeningStep || vm.gameState.value == GameState.Showing) {
         animButton(gameButtonsStates, buttonId)
         vm.checkLastButtonPressed(buttonId)
     }

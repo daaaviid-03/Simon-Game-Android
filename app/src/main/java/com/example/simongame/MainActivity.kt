@@ -17,13 +17,11 @@ import androidx.compose.material3.Surface
 import kotlinx.coroutines.delay
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.*
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import com.example.simongame.game.*
@@ -36,30 +34,27 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.toArgb
 import com.example.simongame.ui.theme.SimonGameTheme
 
 class MainActivity : ComponentActivity() {
     private lateinit var mediaPlayer: MediaPlayer
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        mediaPlayer = MediaPlayer.create(this, R.raw.audio)
+        mediaPlayer.isLooping = true
+        mediaPlayer.start()
         setContent {
             val context = LocalContext.current
-            val mediaPlayer = MediaPlayer.create(this, R.raw.audio)
-            mediaPlayer.isLooping = true
-            mediaPlayer.start()
 
             //usersRep.insertGame("David", 1, 5)
-
-            //val sharedPreferences = getSharedPreferences("app_data", Context.MODE_PRIVATE)
-            //sharedPreferences.edit().putInt("my_int_key", myIntValue).apply()
-            //val lastUserUsedId = sharedPreferences.getInt("last_user_id", -1)
-            //var thisUser by rememberSaveable {
+            // val sharedPreferences = getSharedPreferences("app_data", Context.MODE_PRIVATE)
+            // sharedPreferences.edit().putInt("my_int_key", myIntValue).apply()
+            // val lastUserUsedId = sharedPreferences.getInt("last_user_id", -1)
+            // var thisUser by remember {
             //    mutableStateOf<User?>(null)
-            //}
-            //if (lastUserUsedId != -1) thisUser = usersRep.getUser(lastUserUsedId)
+            // }
+            // if (lastUserUsedId != -1) thisUser = usersRep.getUser(lastUserUsedId)
             SimonGameTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color =  MaterialTheme.colorScheme.background
@@ -68,6 +63,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer.release()
     }
 }
 
@@ -98,7 +97,7 @@ fun MainMenuLayout(context: Context) {
         )
         Spacer(modifier = Modifier.height(50.dp))
         Button(
-            modifier = Modifier.size(width = 250.dp, height = 50.dp,),
+            modifier = Modifier.size(width = 250.dp, height = 50.dp),
             onClick = {
                 val intent = Intent(context, Settings::class.java)
                 startActivity(context, intent, null)
