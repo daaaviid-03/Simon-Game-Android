@@ -1,6 +1,7 @@
-package com.example.simongame.game
+package com.example.simongame.otherwin
 
 import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,9 +21,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -37,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simongame.LEVEL_NAME
 import com.example.simongame.NUMBER_OF_LEVELS
+import com.example.simongame.UpperBarControl
 import com.example.simongame.db.DBViewModel
 import com.example.simongame.db.DBViewModelFactory
 import com.example.simongame.db.GameHistory
@@ -45,76 +44,59 @@ import java.util.Date
 import java.util.Locale
 
 class HighScores : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
 
+        setContent {
             val context = LocalContext.current
 
             val dbVM: DBViewModel = viewModel(
-                factory = DBViewModelFactory(context.applicationContext as Application)
-            )
+                factory = DBViewModelFactory(context.applicationContext as Application))
 
             SimonGameTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ResultsScreen(dbVM)
+                    ResultsScreen(context, dbVM)
                 }
             }
         }
     }
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun ResultsScreen(dbVM: DBViewModel) {
+}
 
-        var thisDifficulty by rememberSaveable { mutableIntStateOf(1) }
+@Composable
+fun ResultsScreen(context: Context, dbVM: DBViewModel) {
 
-        var top10Records by rememberSaveable { mutableStateOf(listOf<GameHistory>()) }
+    var thisDifficulty by rememberSaveable { mutableIntStateOf(1) }
 
-        val onDiffChanged: () -> Unit = {
-            top10Records = dbVM.best10Games.value!![thisDifficulty - 1]
-        }
+    var top10Records by rememberSaveable { mutableStateOf(listOf<GameHistory>()) }
 
-        dbVM.best10Games.observe(this) {
-            onDiffChanged()
-        }
+    val onDiffChanged: () -> Unit = {
+        top10Records = dbVM.best10Games.value!![thisDifficulty - 1]
+    }
 
+    dbVM.best10Games.observe(context as ComponentActivity) {
         onDiffChanged()
+    }
 
+    val difficultyRange = 1f..NUMBER_OF_LEVELS.toFloat()
 
-        val difficultyRange = 1f..NUMBER_OF_LEVELS.toFloat()
+    onDiffChanged()
 
-
-
-        Box(
-            modifier = Modifier
-                .size(300.dp)
-                .padding(16.dp)
-        ) {
-            Button(onClick = {
-                finish()
-            }) {
-                Text(text = "◀")
-            }
-        }
+    Column {
+        UpperBarControl(context, "High Scores")
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(100.dp))
-            Text(
-                text = "High Scores",
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = "Difficulty: ${LEVEL_NAME[thisDifficulty - 1].uppercase()}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Spacer(modifier = Modifier.height(10.dp))
@@ -134,48 +116,42 @@ class HighScores : ComponentActivity() {
             Spacer(modifier = Modifier.height(10.dp))
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(top10Records.size) {
-                    ResultItem(it, top10Records[it])
+                    RecordCard(it, top10Records[it])
                 }
             }
         }
     }
+}
 
-    @Composable
-    fun ResultItem(position: Int, gameHistory: GameHistory) {
-        Card(
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(16.dp)
+@Composable
+fun RecordCard(position: Int, gameHistory: GameHistory) {
+    Card(
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
+        ){
+            Text(
+                text = "${position + 1}. ",
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp
+            )
+            Column {
+                Text(text = "Nickname: ${gameHistory.userName}", fontWeight = FontWeight.Bold)
+                Text(text = "Difficulty: ${gameHistory.difficultyLevel}")
+                Text(text = "Date: ${formatDate(gameHistory.date)}")
+            }
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ){
                 Text(
-                    text = "${position + 1}. ",
+                    text = "${gameHistory.duration}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 30.sp
                 )
-                Column(
-                    //modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(text = "Nickname: ${gameHistory.userName}")
-                    Text(text = "Difficulty: ${gameHistory.difficultyLevel}")
-                    Text(text = "Date: ${formatDate(gameHistory.date)}")
-                }
-
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ){
-                    Text(
-                        text = "${gameHistory.duration}",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 30.sp
-                    )
-                }
-
-
             }
-
         }
     }
 }

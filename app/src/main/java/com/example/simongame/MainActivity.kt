@@ -34,6 +34,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.simongame.otherwin.HighScores
+import com.example.simongame.otherwin.Settings
 import com.example.simongame.ui.theme.SimonGameTheme
 
 class MainActivity : ComponentActivity() {
@@ -46,14 +48,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
 
-            //usersRep.insertGame("David", 1, 5)
-            // val sharedPreferences = getSharedPreferences("app_data", Context.MODE_PRIVATE)
-            // sharedPreferences.edit().putInt("my_int_key", myIntValue).apply()
-            // val lastUserUsedId = sharedPreferences.getInt("last_user_id", -1)
-            // var thisUser by remember {
-            //    mutableStateOf<User?>(null)
-            // }
-            // if (lastUserUsedId != -1) thisUser = usersRep.getUser(lastUserUsedId)
             SimonGameTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -81,6 +75,7 @@ fun MainMenuLayout(context: Context) {
             delay(3000)
         }
     }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()

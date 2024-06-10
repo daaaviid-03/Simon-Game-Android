@@ -10,9 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
-import kotlin.random.Random
 
-class DBViewModel(private var app: Application): AndroidViewModel(app) {
+class DBViewModel(app: Application): AndroidViewModel(app) {
 
     var last5Names = MutableLiveData<List<String>>(listOf())
     var best10Games = MutableLiveData<MutableList<List<GameHistory>>>(mutableListOf())
@@ -21,7 +20,7 @@ class DBViewModel(private var app: Application): AndroidViewModel(app) {
     private val dao = db.gameHistoryDAO()
 
     init {
-        var best10GamesVal = best10Games.value!!
+        val best10GamesVal = best10Games.value!!
         for (i in 1..NUMBER_OF_LEVELS) {
             best10GamesVal.add(listOf())
         }
@@ -52,7 +51,7 @@ class DBViewModel(private var app: Application): AndroidViewModel(app) {
         }
     }
 
-    fun getTop10(difficultyLevel: Int) {
+    private fun getTop10(difficultyLevel: Int) {
         val best10GamesVal = best10Games.value!!
         CoroutineScope(Dispatchers.IO).launch {
             best10GamesVal[difficultyLevel - 1] = dao.getTop10LongestGamesInDifficulty(difficultyLevel)
@@ -60,7 +59,7 @@ class DBViewModel(private var app: Application): AndroidViewModel(app) {
         }
     }
 
-    fun getLast5() {
+    private fun getLast5() {
         CoroutineScope(Dispatchers.IO).launch {
             last5Names.postValue(dao.getLast5NamesFromRecords())
         }

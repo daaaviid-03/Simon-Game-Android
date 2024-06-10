@@ -12,7 +12,6 @@ abstract class GamesHistoryDB : RoomDatabase() {
 
     companion object {
         private var db: GamesHistoryDB? = null
-
         fun getInstance(context: Context): GamesHistoryDB {
             if (db == null) {
                 db = Room.databaseBuilder(

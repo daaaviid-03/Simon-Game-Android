@@ -24,8 +24,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".game.GameActivity" />
-        <activity android:name=".game.Settings" />
-        <activity android:name=".game.HighScores" />
+        <activity android:name=".otherwin.Settings" />
+        <activity android:name=".otherwin.HighScores" />
     </application>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 </manifest>

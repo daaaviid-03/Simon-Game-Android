@@ -7,22 +7,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlin.random.Random
 
-class GameViewModel(private var app: Application): AndroidViewModel(app) {
+class GameViewModel(app: Application): AndroidViewModel(app) {
 
     var gameState = MutableLiveData(GameState.NotStarted)
     var sequence = MutableLiveData<MutableList<Int>>(mutableListOf())
-    var buttonTriggers = MutableLiveData<MutableList<Boolean>>(mutableListOf())
-    var buttonsDisabled = MutableLiveData(false)
-
-    var gameButtonStates = MutableLiveData(MutableList(4){false})
 
     private var currentSequenceIndex = MutableLiveData(0)
     private var numberOfButtons: Int = 4
 
     fun startNewGame(initialSeqLength: Int, numberOfButtons: Int){
         this.numberOfButtons = numberOfButtons
-        buttonTriggers.postValue(MutableList(numberOfButtons){false})
-        buttonsDisabled.postValue(false)
         sequence.postValue(mutableListOf())
         resetCurrentSequenceIndex()
         for (i in 1..initialSeqLength){

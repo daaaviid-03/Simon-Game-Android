@@ -6,30 +6,33 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
 
-class GameCountDownTimerViewModel(private var app: Application): AndroidViewModel(app){
+class GameCountDownTimerViewModel(app: Application): AndroidViewModel(app){
 
-    var isTimerStopped = MutableLiveData(false)
+    private var isTimerStopped = MutableLiveData(false)
     var actualTimeRemaining = MutableLiveData(0L)
     var timerEnded = MutableLiveData(false)
 
     private var timerEndTime = 0L
     private var countDownInterval = 100L
-    fun startNewTimer(timerLenghtMili: Long) {
+    fun startNewTimer(timerMilliseconds: Long) {
         isTimerStopped.postValue(false)
         timerEnded.postValue(false)
-        timerEndTime = Instant.now().toEpochMilli() + timerLenghtMili
+        timerEndTime = Instant.now().toEpochMilli() + timerMilliseconds
         executeTimer()
     }
     fun stopTimer() {
         isTimerStopped.postValue(true)
     }
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun executeTimer() {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Default).launch(start = CoroutineStart.ATOMIC) {
             while (!isTimerStopped.value!! && Instant.now().toEpochMilli() < timerEndTime) {
                 actualTimeRemaining.postValue(timerEndTime - Instant.now().toEpochMilli())
                 delay(countDownInterval)
