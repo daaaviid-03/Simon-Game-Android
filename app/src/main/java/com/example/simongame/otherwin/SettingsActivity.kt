@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import android.media.AudioManager
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.example.simongame.BOARD_SHAPE_INDEX_KEY
 import com.example.simongame.ConfirmExitDialogInformationSettings
 import com.example.simongame.MUSIC_LEVEL_KEY
+import com.example.simongame.MainActivity
 import com.example.simongame.SOUND_LEVEL_KEY
 import com.example.simongame.SimonButtonShapeIcons
 import com.example.simongame.SimonColorRed
@@ -38,15 +38,12 @@ import com.example.simongame.confirmExitDialog
 import com.example.simongame.exitThisActivity
 
 class Settings : ComponentActivity() {
-    private lateinit var audioManager: AudioManager
-
     companion object {
         lateinit var sharedPreferences: SharedPreferences
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         sharedPreferences = getSharedPreferences("SimonGame_Preferences", Context.MODE_PRIVATE)
         setContent {
             val context = LocalContext.current
@@ -55,16 +52,32 @@ class Settings : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Background(context, audioManager)
+                    Background(context)
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        MainActivity.ActivityCounter.count++
+        if (MainActivity.ActivityCounter.count == 1) {
+            MainActivity.MediaPlayerManager.mediaPlayer?.start()
+            MainActivity.MediaPlayerManager.mediaPlayer?.isLooping
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        MainActivity.ActivityCounter.count--
+        if (MainActivity.ActivityCounter.count == 0) {
+            MainActivity.MediaPlayerManager.mediaPlayer?.pause()
         }
     }
 }
 
 @Composable
-fun Background(context: Context,audioManager: AudioManager) {
-
+fun Background(context: Context,) {
+    val mediaPlayer = MainActivity.MediaPlayerManager.mediaPlayer
     val boardShapes = SimonButtonShapeIcons
 
     val boardShapeIndex: MutableIntState = remember {
@@ -73,9 +86,11 @@ fun Background(context: Context,audioManager: AudioManager) {
         )
     }
 
-    val currentMusicVolume =
-        remember { mutableIntStateOf(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)) }
-
+    val currentMusicVolume: MutableIntState = remember {
+        mutableIntStateOf(
+            Settings.sharedPreferences.getInt(MUSIC_LEVEL_KEY, 100)
+        )
+    }
     val currentSoundVolume: MutableIntState = remember {
         mutableIntStateOf(
             Settings.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
@@ -93,13 +108,13 @@ fun Background(context: Context,audioManager: AudioManager) {
             Text("Music:", fontSize = 25.sp)
             Slider(
                 value = currentMusicVolume.intValue.toFloat(),
-                onValueChange = { newValue ->
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newValue.toInt(), 0)
-                    currentMusicVolume.intValue = newValue.toInt()
+                onValueChange = { newVolume ->
+                    currentMusicVolume.intValue = newVolume.toInt()
+                    val volumeFloat = newVolume / 100.0f
+                    mediaPlayer?.setVolume(volumeFloat,volumeFloat)
                 },
-                valueRange = 0f..audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-                    .toFloat(),
-                steps = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                valueRange = 0f..100f,
+                steps = 100
             )
             Text("Sound:", fontSize = 25.sp)
             Slider(
@@ -108,7 +123,7 @@ fun Background(context: Context,audioManager: AudioManager) {
                     currentSoundVolume.intValue = it.toInt()
                 },
                 valueRange = 0f..100f,
-                steps = 101
+                steps = 100
             )
             Spacer(modifier = Modifier.height(50.dp))
             Text("Board:", fontSize = 25.sp)
@@ -124,7 +139,9 @@ fun Background(context: Context,audioManager: AudioManager) {
                 Image(
                     painter = painterResource(id = boardShapes[boardShapeIndex.intValue]),
                     contentDescription = null,
-                    modifier = Modifier.size(225.dp).padding(20.dp),
+                    modifier = Modifier
+                        .size(225.dp)
+                        .padding(20.dp),
                     colorFilter = ColorFilter.tint(SimonColorRed)
                 )
                 Button(

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simongame.LEVEL_NAME
+import com.example.simongame.MainActivity
 import com.example.simongame.NUMBER_OF_LEVELS
 import com.example.simongame.UpperBarControl
 import com.example.simongame.db.DBViewModel
@@ -61,6 +62,21 @@ class HighScores : ComponentActivity() {
                     ResultsScreen(context, dbVM)
                 }
             }
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+        MainActivity.ActivityCounter.count++
+        if (MainActivity.ActivityCounter.count == 1) {
+            MainActivity.MediaPlayerManager.mediaPlayer?.start()
+            MainActivity.MediaPlayerManager.mediaPlayer?.isLooping
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        MainActivity.ActivityCounter.count--
+        if (MainActivity.ActivityCounter.count == 0) {
+            MainActivity.MediaPlayerManager.mediaPlayer?.pause()
         }
     }
 }

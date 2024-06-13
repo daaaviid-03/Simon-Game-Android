@@ -2,6 +2,7 @@ package com.example.simongame
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,19 +40,25 @@ import com.example.simongame.otherwin.Settings
 import com.example.simongame.ui.theme.SimonGameTheme
 
 class MainActivity : ComponentActivity() {
-    private lateinit var mediaPlayer: MediaPlayer
+    object MediaPlayerManager {
+        var mediaPlayer: MediaPlayer? = null
+    }
+    object ActivityCounter {
+        var count = 0
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mediaPlayer = MediaPlayer.create(this, R.raw.audio)
-        mediaPlayer.isLooping = true
-        mediaPlayer.start()
+         MediaPlayerManager.mediaPlayer = MediaPlayer.create(this, R.raw.audio).apply {
+            isLooping = true
+            start()
+        }
         setContent {
             val context = LocalContext.current
 
             SimonGameTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color =  MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     MainMenuLayout(context)
                 }
@@ -60,8 +67,25 @@ class MainActivity : ComponentActivity() {
     }
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer.release()
+        MediaPlayerManager.mediaPlayer?.release()
     }
+
+    override fun onPause() {
+        super.onPause()
+        ActivityCounter.count--
+        if (ActivityCounter.count == 0) {
+            MediaPlayerManager.mediaPlayer?.pause()
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+        ActivityCounter.count++
+        if (ActivityCounter.count == 1) {
+            MediaPlayerManager.mediaPlayer?.start()
+            MediaPlayerManager.mediaPlayer?.isLooping
+        }
+    }
+
 }
 
 @Composable

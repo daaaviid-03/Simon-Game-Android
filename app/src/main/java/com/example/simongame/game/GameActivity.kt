@@ -22,6 +22,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simongame.ConfirmExitDialogInformationEndGame
 import com.example.simongame.ConfirmExitDialogInformationGame
+import com.example.simongame.MainActivity
 import com.example.simongame.confirmExitDialog
 import com.example.simongame.db.DBViewModel
 import com.example.simongame.db.DBViewModelFactory
@@ -70,6 +71,21 @@ class GameActivity : ComponentActivity() {
                     BackgroundLayout(context, vm, timerVM, dbVM)
                 }
             }
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+        MainActivity.ActivityCounter.count++
+        if (MainActivity.ActivityCounter.count == 1) {
+            MainActivity.MediaPlayerManager.mediaPlayer?.start()
+            MainActivity.MediaPlayerManager.mediaPlayer?.isLooping
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        MainActivity.ActivityCounter.count--
+        if (MainActivity.ActivityCounter.count == 0) {
+            MainActivity.MediaPlayerManager.mediaPlayer?.pause()
         }
     }
 }
