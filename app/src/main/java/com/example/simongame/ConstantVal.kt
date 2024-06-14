@@ -24,6 +24,8 @@ val SIMON_COLOR_LIST = listOf(SimonColorRed, SimonColorBlue, SimonColorGreen, Si
 
 val SimonButtonShapeIcons = listOf(R.drawable.scuare, R.drawable.circle, R.drawable.hexagon, R.drawable.heart, R.drawable.star)
 
+val SimonButtonSound = listOf(R.raw.do_note, R.raw.re_note, R.raw.mi_note, R.raw.fa_note)
+
 const val NUMBER_OF_LEVELS: Int = 5
 val LEVEL_NAME = listOf("beginner", "easy", "intermediate", "difficult", "expert")
 val LEVEL_LEN_INITIAL_SEQUENCE_STEPS = intArrayOf(2, 4, 6, 8, 10)

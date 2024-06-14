@@ -10,12 +10,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SimonGame"
-        tools:targetApi="31">
+        android:theme="@style/Theme.SimonGame">
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.SimonGame">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,8 +22,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".game.GameActivity" />
-        <activity android:name=".otherwin.Settings" />
-        <activity android:name=".otherwin.HighScores" />
+        <activity android:name=".otherwin.SettingsActivity" />
+        <activity android:name=".otherwin.HighScoresActivity" />
     </application>
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"
+        tools:ignore="ManifestOrder" />
 </manifest>

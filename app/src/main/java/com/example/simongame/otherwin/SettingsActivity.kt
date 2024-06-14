@@ -37,7 +37,7 @@ import com.example.simongame.UpperBarControl
 import com.example.simongame.confirmExitDialog
 import com.example.simongame.exitThisActivity
 
-class Settings : ComponentActivity() {
+class SettingsActivity : ComponentActivity() {
     companion object {
         lateinit var sharedPreferences: SharedPreferences
     }
@@ -82,24 +82,29 @@ fun Background(context: Context,) {
 
     val boardShapeIndex: MutableIntState = remember {
         mutableIntStateOf(
-            Settings.sharedPreferences.getInt(BOARD_SHAPE_INDEX_KEY, 0)
+            SettingsActivity.sharedPreferences.getInt(BOARD_SHAPE_INDEX_KEY, 0)
         )
     }
 
     val currentMusicVolume: MutableIntState = remember {
         mutableIntStateOf(
-            Settings.sharedPreferences.getInt(MUSIC_LEVEL_KEY, 100)
+            SettingsActivity.sharedPreferences.getInt(MUSIC_LEVEL_KEY, 100)
         )
     }
     val currentSoundVolume: MutableIntState = remember {
         mutableIntStateOf(
-            Settings.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
+            SettingsActivity.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
         )
     }
 
     Column {
         UpperBarControl(context, "Settings") {
-            confirmExitDialog(context, ConfirmExitDialogInformationSettings)
+            confirmExitDialog(context, ConfirmExitDialogInformationSettings) {
+                // Don't save preferences for music level
+                val volumeFloat = SettingsActivity.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100) / 100.0f
+                mediaPlayer?.setVolume(volumeFloat, volumeFloat)
+                exitThisActivity(context)
+            }
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -111,7 +116,7 @@ fun Background(context: Context,) {
                 onValueChange = { newVolume ->
                     currentMusicVolume.intValue = newVolume.toInt()
                     val volumeFloat = newVolume / 100.0f
-                    mediaPlayer?.setVolume(volumeFloat,volumeFloat)
+                    mediaPlayer?.setVolume(volumeFloat, volumeFloat)
                 },
                 valueRange = 0f..100f,
                 steps = 100
@@ -172,7 +177,7 @@ fun Background(context: Context,) {
 }
 
 private fun saveAndExit(context: Context, boardShapeIndex: Int, musicVolume: Int, soundVolume: Int) {
-    Settings.sharedPreferences.edit()
+    SettingsActivity.sharedPreferences.edit()
         .putInt(BOARD_SHAPE_INDEX_KEY, boardShapeIndex)
         .putInt(MUSIC_LEVEL_KEY, musicVolume)
         .putInt(SOUND_LEVEL_KEY, soundVolume)

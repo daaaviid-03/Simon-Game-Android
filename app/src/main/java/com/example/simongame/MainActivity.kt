@@ -2,7 +2,6 @@ package com.example.simongame
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,8 +34,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.example.simongame.otherwin.HighScores
-import com.example.simongame.otherwin.Settings
+import com.example.simongame.otherwin.HighScoresActivity
+import com.example.simongame.otherwin.SettingsActivity
 import com.example.simongame.ui.theme.SimonGameTheme
 
 class MainActivity : ComponentActivity() {
@@ -48,7 +47,7 @@ class MainActivity : ComponentActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-         MediaPlayerManager.mediaPlayer = MediaPlayer.create(this, R.raw.audio).apply {
+        MediaPlayerManager.mediaPlayer = MediaPlayer.create(this, R.raw.audio).apply {
             isLooping = true
             start()
         }
@@ -118,7 +117,7 @@ fun MainMenuLayout(context: Context) {
         Button(
             modifier = Modifier.size(width = 250.dp, height = 50.dp),
             onClick = {
-                val intent = Intent(context, Settings::class.java)
+                val intent = Intent(context, SettingsActivity::class.java)
                 startActivity(context, intent, null)
             }
         ) {
@@ -128,7 +127,7 @@ fun MainMenuLayout(context: Context) {
         Button(
             modifier = Modifier.size(width = 250.dp, height = 50.dp),
             onClick = {
-                val intent = Intent(context, HighScores::class.java)
+                val intent = Intent(context, HighScoresActivity::class.java)
                 startActivity(context, intent, null)
             }
         ) {

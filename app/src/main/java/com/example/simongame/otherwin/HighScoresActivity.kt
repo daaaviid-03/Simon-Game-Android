@@ -44,7 +44,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class HighScores : ComponentActivity() {
+class HighScoresActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

@@ -20,14 +20,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,7 +33,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,17 +41,15 @@ import com.example.simongame.ConfirmExitDialogInformationGame
 import com.example.simongame.LEVEL_LEN_INITIAL_SEQUENCE_STEPS
 import com.example.simongame.LEVEL_MAX_RESPONSE_TIME_SEC
 import com.example.simongame.LEVEL_VELOCITY_SEC
-import com.example.simongame.MainActivity
-import com.example.simongame.R
 import com.example.simongame.SOUND_LEVEL_KEY
 import com.example.simongame.SimonButtonShapeIcons
+import com.example.simongame.SimonButtonSound
 import com.example.simongame.SimonColorBlue
 import com.example.simongame.SimonColorGreen
 import com.example.simongame.SimonColorRed
 import com.example.simongame.SimonColorYellow
 import com.example.simongame.UpperBarControl
 import com.example.simongame.confirmExitDialog
-import com.example.simongame.otherwin.Settings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -338,11 +332,11 @@ private fun pauseGame(vm: GameViewModel) {
     }
 }
 fun playSound(context: Context, soundResId: Int) {
-    val currentSoundVolume =Settings.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
+    val currentSoundVolume = GameActivity.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
     val value = currentSoundVolume.toFloat()
     val soundFloat = value / 100.0f
     val mediaPlayer = MediaPlayer.create(context, soundResId)
-    mediaPlayer?.setVolume(soundFloat,soundFloat)
+    mediaPlayer?.setVolume(soundFloat, soundFloat)
     mediaPlayer.start()
     mediaPlayer.setOnCompletionListener {
         it.release()
@@ -355,7 +349,7 @@ private fun animButton(
 ) {
     CoroutineScope(Dispatchers.Default).launch {
         buttonToDisplay.value = buttonId
-        playSound(context, R.raw.button_sound)
+        playSound(context, SimonButtonSound[buttonId])
         delay(200L)
         if (buttonToDisplay.value == buttonId)
             buttonToDisplay.value = null
