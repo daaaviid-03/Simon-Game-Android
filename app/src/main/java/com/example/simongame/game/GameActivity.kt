@@ -15,30 +15,40 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.simongame.ui.theme.SimonGameTheme
-import android.app.Activity
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simongame.ConfirmExitDialogInformationEndGame
 import com.example.simongame.ConfirmExitDialogInformationGame
-import com.example.simongame.MainActivity
 import com.example.simongame.MusicManager
 import com.example.simongame.confirmExitDialog
 import com.example.simongame.db.DBViewModel
 import com.example.simongame.db.DBViewModelFactory
 import com.example.simongame.exitThisActivity
 
+/**
+ * Main activity of the game
+ */
 class GameActivity : ComponentActivity() {
     companion object {
+        /**
+         * State of the game activity
+         */
         var state: Int = 0
+        /**
+         * Shared preferences
+         */
         lateinit var sharedPreferences: SharedPreferences
+        /**
+         * Game view model
+         */
         lateinit var vm: GameViewModel
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        // Initialize shared preferences
         sharedPreferences = getSharedPreferences("SimonGame_Preferences", Context.MODE_PRIVATE)
 
         // Handle the return button pressed
@@ -54,13 +64,13 @@ class GameActivity : ComponentActivity() {
 
         setContent {
             val context = LocalContext.current
-
+            // Initialize game view model
             vm = viewModel(
                 factory = GameViewModelFactory(context.applicationContext as Application))
-
+            // Initialize timer view model
             val timerVM: GameCountDownTimerViewModel = viewModel(
                 factory = GameCountDownTimerViewModelFactory(context.applicationContext as Application))
-
+            // Initialize database view model
             val dbVM: DBViewModel = viewModel(
                 factory = DBViewModelFactory(context.applicationContext as Application))
 
@@ -87,6 +97,9 @@ class GameActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Layout of the game
+ */
 @Composable
 fun BackgroundLayout(
     context: Context,
@@ -94,11 +107,15 @@ fun BackgroundLayout(
     timerVM: GameCountDownTimerViewModel,
     dbVM: DBViewModel
 ){
+    // Saves the actual difficulty of the game
     var difficulty by rememberSaveable { mutableIntStateOf(0) }
+    // Saves the state of the game
     var state by rememberSaveable { mutableIntStateOf(GameActivity.state) }
+    // Saves the length of the sequence obtained
     var sequenceLen by rememberSaveable { mutableIntStateOf(0) }
     when (state) {
         0 -> {
+            // Displays the difficulty selector
             DifficultySelectorState(context) {
                 difficulty = it
                 GameActivity.state = 1
@@ -106,6 +123,7 @@ fun BackgroundLayout(
             }
         }
         1 -> {
+            // Displays the actual game screen
             PlayGameState(context, vm, timerVM, difficulty) {
                 sequenceLen = it
                 GameActivity.state = 2
@@ -113,6 +131,7 @@ fun BackgroundLayout(
             }
         }
         else -> {
+            // Displays the end game screen
             EndGameState(context, dbVM, sequenceLen, difficulty) {
                 dbVM.insertGame(it, difficulty, sequenceLen)
                 exitThisActivity(context)

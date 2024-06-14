@@ -11,25 +11,42 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
 
+/**
+ * ViewModel for the database
+ */
 class DBViewModel(app: Application): AndroidViewModel(app) {
-
+    /**
+     * Holds the last 5 names from the records
+     */
     var last5Names = MutableLiveData<List<String>>(listOf())
+    /**
+     * Holds the 10 longest games in each difficulty level
+     */
     var best10Games = MutableLiveData<MutableList<List<GameHistory>>>(mutableListOf())
 
+    /**
+     * DB instance
+     */
     private val db = GamesHistoryDB.getInstance(app.applicationContext)
+
+    /**
+     * DAO instance to interact with
+     */
     private val dao = db.gameHistoryDAO()
 
     init {
+        // Initialize the lists
         val best10GamesVal = best10Games.value!!
         for (i in 1..NUMBER_OF_LEVELS) {
             best10GamesVal.add(listOf())
         }
         best10Games.postValue(best10GamesVal)
-        println(best10Games.value)
-        println(db)
         updateLists()
     }
 
+    /**
+     * Update the lists in a difficulty level
+     */
     private fun updateLists(difficultyLevel: Int? = null) {
         getLast5()
         if (difficultyLevel == null) {
@@ -42,6 +59,9 @@ class DBViewModel(app: Application): AndroidViewModel(app) {
 
     }
 
+    /**
+     * Insert a game record in the database
+     */
     fun insertGame(userName: String, difficultyLevel: Int, duration: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             val thisHist =
@@ -51,6 +71,9 @@ class DBViewModel(app: Application): AndroidViewModel(app) {
         }
     }
 
+    /**
+     * Get the 10 longest games in a difficulty level
+     */
     private fun getTop10(difficultyLevel: Int) {
         val best10GamesVal = best10Games.value!!
         CoroutineScope(Dispatchers.IO).launch {
@@ -59,6 +82,9 @@ class DBViewModel(app: Application): AndroidViewModel(app) {
         }
     }
 
+    /**
+     * Get the last 5 names from the records
+     */
     private fun getLast5() {
         CoroutineScope(Dispatchers.IO).launch {
             last5Names.postValue(dao.getLast5NamesFromRecords())
@@ -66,6 +92,9 @@ class DBViewModel(app: Application): AndroidViewModel(app) {
     }
 }
 
+/**
+ * Factory for DBViewModel
+ */
 @Suppress("UNCHECKED_CAST")
 class DBViewModelFactory(
     private val application: Application

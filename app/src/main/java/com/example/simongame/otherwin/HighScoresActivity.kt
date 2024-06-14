@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simongame.LEVEL_NAME
-import com.example.simongame.MainActivity
 import com.example.simongame.MusicManager
 import com.example.simongame.NUMBER_OF_LEVELS
 import com.example.simongame.UpperBarControl
@@ -45,13 +44,16 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * High Scores Activity
+ */
 class HighScoresActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             val context = LocalContext.current
-
+            // Get the DB ViewModel
             val dbVM: DBViewModel = viewModel(
                 factory = DBViewModelFactory(context.applicationContext as Application))
 
@@ -60,7 +62,7 @@ class HighScoresActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ResultsScreen(context, dbVM)
+                    HighScoresLayout(context, dbVM)
                 }
             }
         }
@@ -76,21 +78,28 @@ class HighScoresActivity : ComponentActivity() {
     }
 }
 
+/**
+ * High Scores Layout
+ */
 @Composable
-fun ResultsScreen(context: Context, dbVM: DBViewModel) {
-
+fun HighScoresLayout(context: Context, dbVM: DBViewModel) {
+    // Get the difficulty level from the slider
     var thisDifficulty by rememberSaveable { mutableIntStateOf(1) }
-
+    // Get the top 10 records for the selected difficulty level
     var top10Records by rememberSaveable { mutableStateOf(listOf<GameHistory>()) }
-
+    /**
+     * Update the top 10 records when the difficulty level changes
+     */
     val onDiffChanged: () -> Unit = {
         top10Records = dbVM.best10Games.value!![thisDifficulty - 1]
     }
 
+    // Observe the best10Games LiveData in the DBViewModel
     dbVM.best10Games.observe(context as ComponentActivity) {
         onDiffChanged()
     }
 
+    // Difficulty range
     val difficultyRange = 1f..NUMBER_OF_LEVELS.toFloat()
 
     onDiffChanged()
@@ -104,6 +113,7 @@ fun ResultsScreen(context: Context, dbVM: DBViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(10.dp))
+            // Display the difficulty level name
             Text(
                 text = "Difficulty: ${LEVEL_NAME[thisDifficulty - 1].uppercase()}",
                 fontWeight = FontWeight.Bold,
@@ -111,6 +121,7 @@ fun ResultsScreen(context: Context, dbVM: DBViewModel) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Spacer(modifier = Modifier.height(10.dp))
+            // Difficulty level slider
             Slider(
                 value = thisDifficulty.toFloat(),
                 onValueChange = {
@@ -118,13 +129,14 @@ fun ResultsScreen(context: Context, dbVM: DBViewModel) {
                     onDiffChanged()
                 },
                 valueRange = difficultyRange,
-                steps = NUMBER_OF_LEVELS - 1,
+                steps = NUMBER_OF_LEVELS - 2,
 
                 modifier = Modifier
                     .size(width = 300.dp, height = 30.dp)
                     .height(50.dp)
             )
             Spacer(modifier = Modifier.height(10.dp))
+            // Display the top 10 records
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(top10Records.size) {
                     RecordCard(it, top10Records[it])
@@ -134,6 +146,9 @@ fun ResultsScreen(context: Context, dbVM: DBViewModel) {
     }
 }
 
+/**
+ * Record Card Layout
+ */
 @Composable
 fun RecordCard(position: Int, gameHistory: GameHistory) {
     Card(
@@ -167,6 +182,9 @@ fun RecordCard(position: Int, gameHistory: GameHistory) {
     }
 }
 
+/**
+ * Format Date to dd/MM/yyyy HH:mm:ss
+ */
 fun formatDate(epochMilliseconds: Long): String {
     val date = Date(epochMilliseconds)
     val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())

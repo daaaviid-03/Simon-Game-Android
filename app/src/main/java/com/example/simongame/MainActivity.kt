@@ -2,6 +2,7 @@ package com.example.simongame
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,7 +28,6 @@ import androidx.core.content.ContextCompat.startActivity
 import com.example.simongame.game.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.size
-import android.media.MediaPlayer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.ButtonDefaults
@@ -38,10 +38,20 @@ import com.example.simongame.otherwin.HighScoresActivity
 import com.example.simongame.otherwin.SettingsActivity
 import com.example.simongame.ui.theme.SimonGameTheme
 
+/**
+ * Main Menu Activity
+ */
 class MainActivity : ComponentActivity() {
+    companion object {
+        /**
+         * Shared Preferences object for storing game settings
+         */
+        lateinit var sharedPreferences: SharedPreferences
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MusicManager.startMusic(this)
+        sharedPreferences = getSharedPreferences("SimonGame_Preferences", Context.MODE_PRIVATE)
+        MusicManager.startMusic(this, sharedPreferences.getInt(MUSIC_LEVEL_KEY, 100) / 100f)
         setContent {
             val context = LocalContext.current
 
@@ -71,11 +81,15 @@ class MainActivity : ComponentActivity() {
 
 }
 
+/**
+ * Main Menu Layout
+ */
 @Composable
 fun MainMenuLayout(context: Context) {
     val colors = SIMON_COLOR_LIST
     var currentIndex by remember { mutableIntStateOf(0) }
 
+    // Change color of button every 3 seconds
     LaunchedEffect(Unit) {
         while (true) {
             currentIndex = (currentIndex + 1) % colors.size
@@ -90,6 +104,7 @@ fun MainMenuLayout(context: Context) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(50.dp))
+        // Display the profile picture
         Icon(
             Icons.Rounded.Person,
             contentDescription = null,
@@ -98,6 +113,7 @@ fun MainMenuLayout(context: Context) {
                 .aspectRatio(1f),
         )
         Spacer(modifier = Modifier.height(50.dp))
+        // Display the settings button
         Button(
             modifier = Modifier.size(width = 250.dp, height = 50.dp),
             onClick = {
@@ -108,6 +124,7 @@ fun MainMenuLayout(context: Context) {
             Text("Settings", fontSize = 25.sp)
         }
         Spacer(modifier = Modifier.height(30.dp))
+        // Display the high scores button
         Button(
             modifier = Modifier.size(width = 250.dp, height = 50.dp),
             onClick = {
@@ -121,6 +138,7 @@ fun MainMenuLayout(context: Context) {
             )
         }
         Spacer(modifier = Modifier.height(150.dp))
+        // Display the play button
         Button(
             onClick = {
                 val intent = Intent(context, GameActivity::class.java)

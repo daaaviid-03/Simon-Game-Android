@@ -32,7 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -46,7 +45,9 @@ import com.example.simongame.UpperBarControl
 import com.example.simongame.confirmExitDialog
 import com.example.simongame.db.DBViewModel
 
-
+/**
+ * End game screen layout
+ */
 @Composable
 fun EndGameState(
     context: Context,
@@ -55,21 +56,24 @@ fun EndGameState(
     difficulty: Int,
     onclick: (name: String) -> Unit
 ) {
-
+    // list of recent nicknames from db
     var recentRecordNames by rememberSaveable {
         mutableStateOf(
             listOf<String>()
         )
     }
-
+    // observe last 5 names from db
     dbVM.last5Names.observe(LocalContext.current as ComponentActivity) {
         recentRecordNames = it!!
     }
-
+    // actual nickname selected
     val userName = rememberSaveable { mutableStateOf("") }
-
+    // whether to display error message or not
     val withError = rememberSaveable { mutableStateOf(false) }
 
+    /**
+     * confirm nickname check for empty values
+     */
     val tryToConfirm: (name: String) -> Unit = {
         if (it.isNotEmpty())
             onclick(it)
@@ -77,60 +81,79 @@ fun EndGameState(
             withError.value = true
     }
 
-    Column(modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        UpperBarControl(context, "GAME\n\nOVER...") {
+    Column(modifier = Modifier.fillMaxSize()) {
+        UpperBarControl(context, "GAME OVER") {
             confirmExitDialog(context, ConfirmExitDialogInformationEndGame)
         }
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(text = "You have reached $sequenceLen steps as a ${LEVEL_NAME[difficulty - 1]}.", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(text = "Choose your nickname to save the record:", fontSize = 10.sp)
-        NickNameEntry(userName, tryToConfirm)
-        if (withError.value) {
-            Text(text = "You can't leave the field empty. Please enter a nickname", fontSize = 20.sp, color = MaterialTheme.colorScheme.error)
-        }
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(text = "Recent nicknames used:", fontSize = 10.sp)
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(recentRecordNames) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.height(5.dp))
+            // display sequence length obtained
+            Text(
+                text = "You have reached $sequenceLen steps.",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            // display difficulty level
+            Text(
+                text = "Playing at: ${LEVEL_NAME[difficulty - 1]} level.",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(text = "Choose your nickname to save the record:", fontSize = 16.sp)
+            NickNameEntry(userName, tryToConfirm)
+            // error message
+            if (withError.value) {
                 Text(
-                    text = it,
-                    fontSize = 30.sp,
-                    modifier = Modifier.clickable {
-                        userName.value = it
-                    }
+                    text = "You can't leave the field empty. Please enter a nickname",
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.error
                 )
             }
-        }
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(10.dp)
-        ){
-            Button(
-                onClick = {
-                    confirmExitDialog(context, ConfirmExitDialogInformationEndGame)
-                },
-                modifier = Modifier.padding(10.dp).weight(3f)
-            ) {
-                Text("Don't Save", fontSize = 20.sp)
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(text = "Recent nicknames used:", fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            // list of recent nicknames used
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(recentRecordNames) {
+                    Text(
+                        text = it,
+                        fontSize = 30.sp,
+                        modifier = Modifier.clickable {
+                            userName.value = it
+                        }
+                    )
+                }
             }
-            Spacer(modifier = Modifier.weight(2f))
-            Button(
-                onClick = {
-                    tryToConfirm(userName.value)
-                },
-                modifier = Modifier.padding(10.dp).weight(2f)
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.padding(10.dp)
             ) {
-                Text("Save", fontSize = 20.sp)
+                // cancel button
+                Button(
+                    onClick = {
+                        confirmExitDialog(context, ConfirmExitDialogInformationEndGame)
+                    },
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Text("Don't Save", fontSize = 20.sp)
+                }
+                // save button
+                Button(
+                    onClick = {
+                        tryToConfirm(userName.value)
+                    },
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Text("Save", fontSize = 20.sp)
+                }
             }
         }
-
     }
 }
 
+// nickname entry layout
 @Composable
 fun NickNameEntry(userName: MutableState<String>, onclick: (userNameStr: String) -> Unit) {
     val keyboardController = LocalSoftwareKeyboardController.current

@@ -27,11 +27,14 @@ import com.example.simongame.LEVEL_VELOCITY_SEC
 import com.example.simongame.NUMBER_OF_LEVELS
 import com.example.simongame.UpperBarControl
 
+/**
+ * Difficulty selector layout for the game
+ */
 @Composable
 fun DifficultySelectorState(context: Context, onclick: (difficulty: Int) -> Unit){
-
+    // Actual difficulty selected
     var difficulty by rememberSaveable { mutableIntStateOf(1) }
-
+    // Possible difficulties range
     val difficultyRange = 1f..NUMBER_OF_LEVELS.toFloat()
     Column {
         UpperBarControl(context, "Difficulty\n\nSelector")
@@ -40,6 +43,7 @@ fun DifficultySelectorState(context: Context, onclick: (difficulty: Int) -> Unit
             horizontalAlignment = Alignment.CenterHorizontally//verticalArrangement = Arrangement.spacedBy(10.dp, alignment = Alignment.CenterVertically)
         ) {
             Spacer(modifier = Modifier.weight(1f))
+            // Display the difficulty level name
             Text(
                 text = LEVEL_NAME[difficulty - 1].uppercase(),
                 fontWeight = FontWeight.Bold,
@@ -47,13 +51,14 @@ fun DifficultySelectorState(context: Context, onclick: (difficulty: Int) -> Unit
                 modifier = Modifier.weight(2f)
             )
             Spacer(modifier = Modifier.weight(0.5f))
+            // Slider to select the difficulty level
             Slider(
                 value = difficulty.toFloat(),
                 onValueChange = {
                     difficulty = it.toInt()
                 },
                 valueRange = difficultyRange,
-                steps = NUMBER_OF_LEVELS - 1,
+                steps = NUMBER_OF_LEVELS - 2,
 
                 modifier = Modifier
                     .size(width = 300.dp, height = 150.dp)
@@ -76,6 +81,7 @@ fun DifficultySelectorState(context: Context, onclick: (difficulty: Int) -> Unit
                 valUnit="s/c"
             )
             Spacer(modifier = Modifier.weight(0.5f))
+            // Button to start the game
             Button(
                 onClick = {
                     onclick(difficulty)
@@ -92,20 +98,24 @@ fun DifficultySelectorState(context: Context, onclick: (difficulty: Int) -> Unit
     }
 }
 
+/**
+ * Layout for the info lines of the difficulty selector
+ */
 @Composable
 fun InfoLineLayout(infoText: String, value: String, valUnit: String){
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
-        //horizontalArrangement = Arrangement.spacedBy(30.dp)
     ){
         Spacer(modifier = Modifier.weight(0.5f))
+        // Name of the info line
         Text(
             text = infoText,
             fontSize = 20.sp,
             modifier = Modifier.weight(3f)
         )
         Spacer(modifier = Modifier.weight(1f))
+        // Value of the info line
         Text(
             text = "$value $valUnit",
             fontSize = 20.sp,

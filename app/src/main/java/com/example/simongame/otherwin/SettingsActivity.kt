@@ -37,13 +37,20 @@ import com.example.simongame.UpperBarControl
 import com.example.simongame.confirmExitDialog
 import com.example.simongame.exitThisActivity
 
+/**
+ * Settings screen
+ */
 class SettingsActivity : ComponentActivity() {
     companion object {
+        /**
+         * Shared preferences for the settings screen
+         */
         lateinit var sharedPreferences: SharedPreferences
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Initialize shared preferences
         sharedPreferences = getSharedPreferences("SimonGame_Preferences", Context.MODE_PRIVATE)
         setContent {
             val context = LocalContext.current
@@ -68,22 +75,24 @@ class SettingsActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Settings screen UI
+ */
 @Composable
-fun Background(context: Context,) {
-//    val mediaPlayer = MainActivity.MediaPlayerManager.mediaPlayer
-    val boardShapes = SimonButtonShapeIcons
-
+fun Background(context: Context) {
+    // Save the current board shape index
     val boardShapeIndex: MutableIntState = remember {
         mutableIntStateOf(
             SettingsActivity.sharedPreferences.getInt(BOARD_SHAPE_INDEX_KEY, 0)
         )
     }
-
+    // Save the current music volume levels
     val currentMusicVolume: MutableIntState = remember {
         mutableIntStateOf(
             SettingsActivity.sharedPreferences.getInt(MUSIC_LEVEL_KEY, 100)
         )
     }
+    // Save the current sound volume levels
     val currentSoundVolume: MutableIntState = remember {
         mutableIntStateOf(
             SettingsActivity.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
@@ -104,6 +113,7 @@ fun Background(context: Context,) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
+            // Music volume
             Text("Music:", fontSize = 25.sp)
             Slider(
                 value = currentMusicVolume.intValue.toFloat(),
@@ -114,8 +124,9 @@ fun Background(context: Context,) {
                     MusicManager.setVolume(volumeFloat)
                 },
                 valueRange = 0f..100f,
-                steps = 100
+                steps = 99
             )
+            // Sound volume
             Text("Sound:", fontSize = 25.sp)
             Slider(
                 value = currentSoundVolume.intValue.toFloat(),
@@ -123,37 +134,42 @@ fun Background(context: Context,) {
                     currentSoundVolume.intValue = it.toInt()
                 },
                 valueRange = 0f..100f,
-                steps = 100
+                steps = 99
             )
             Spacer(modifier = Modifier.height(50.dp))
+            // Board shape
             Text("Board:", fontSize = 25.sp)
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // Previous button
                 Button(
                     onClick = {
                         boardShapeIndex.intValue =
-                            (boardShapeIndex.intValue - 1) % boardShapes.size
+                            (boardShapeIndex.intValue - 1) % SimonButtonShapeIcons.size
                     }
                 ) {
                     Text("◀")
                 }
+                // Actual shape
                 Image(
-                    painter = painterResource(id = boardShapes[boardShapeIndex.intValue]),
+                    painter = painterResource(id = SimonButtonShapeIcons[boardShapeIndex.intValue]),
                     contentDescription = null,
                     modifier = Modifier
                         .size(225.dp)
                         .padding(20.dp),
                     colorFilter = ColorFilter.tint(SimonColorRed)
                 )
+                // Next button
                 Button(
                     onClick = {
                         boardShapeIndex.intValue =
-                            (boardShapeIndex.intValue + 1) % boardShapes.size
+                            (boardShapeIndex.intValue + 1) % SimonButtonShapeIcons.size
                     }
                 ) {
                     Text("▶")
                 }
             }
             Spacer(modifier = Modifier.height(80.dp))
+            // Save button
             Button(
                 onClick = {
                     saveAndExit(
@@ -171,6 +187,9 @@ fun Background(context: Context,) {
     }
 }
 
+/**
+ * Save the settings and exit the activity
+ */
 private fun saveAndExit(context: Context, boardShapeIndex: Int, musicVolume: Int, soundVolume: Int) {
     SettingsActivity.sharedPreferences.edit()
         .putInt(BOARD_SHAPE_INDEX_KEY, boardShapeIndex)

@@ -13,23 +13,56 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
 
+/**
+ * Game countdown timer view model to access to the variables in real time
+ */
 class GameCountDownTimerViewModel(app: Application): AndroidViewModel(app){
 
-    private var isTimerStopped = MutableLiveData(false)
+    /**
+     * Time remaining in milliseconds
+     */
     var actualTimeRemaining = MutableLiveData(0L)
+
+    /**
+     * Indicates if the timer has ended
+     */
     var timerEnded = MutableLiveData(false)
 
+    /**
+     * Indicates if the timer is stopped
+     */
+    private var isTimerStopped = MutableLiveData(false)
+
+    /**
+     * Timer end time in milliseconds
+     */
     private var timerEndTime = 0L
+
+    /**
+     * Timer interval in milliseconds
+     */
     private var countDownInterval = 100L
+
+    /**
+     * Starts a new timer with the given time
+     */
     fun startNewTimer(timerMilliseconds: Long) {
         isTimerStopped.postValue(false)
         timerEnded.postValue(false)
         timerEndTime = Instant.now().toEpochMilli() + timerMilliseconds
         executeTimer()
     }
+
+    /**
+     * Stops the actual timer
+     */
     fun stopTimer() {
         isTimerStopped.postValue(true)
     }
+
+    /**
+     * Executes the timer in a coroutine
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun executeTimer() {
         CoroutineScope(Dispatchers.Default).launch(start = CoroutineStart.ATOMIC) {
@@ -43,6 +76,10 @@ class GameCountDownTimerViewModel(app: Application): AndroidViewModel(app){
         }
     }
 }
+
+/**
+ * Factory to create a GameCountDownTimerViewModel
+ */
 @Suppress("UNCHECKED_CAST")
 class GameCountDownTimerViewModelFactory(
     private val application: Application

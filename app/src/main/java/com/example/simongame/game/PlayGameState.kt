@@ -4,7 +4,6 @@ import android.content.Context
 import android.media.MediaPlayer
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,7 +47,6 @@ import com.example.simongame.SimonColorBlue
 import com.example.simongame.SimonColorGreen
 import com.example.simongame.SimonColorRed
 import com.example.simongame.SimonColorYellow
-import com.example.simongame.UpperBarControl
 import com.example.simongame.confirmExitDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +55,9 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.log
 
+/**
+ * Display echo animation for extra information
+ */
 private fun displayEchoAnim(
     text: String,
     echoString: MutableState<String>,
@@ -68,6 +69,9 @@ private fun displayEchoAnim(
     }
 }
 
+/**
+ * Play game layout
+ */
 @Composable
 fun PlayGameState(
     context: Context,
@@ -76,80 +80,78 @@ fun PlayGameState(
     difficulty: Int,
     onclick: (sequenceLen: Int) -> Unit
 ){
+    // Hint to play to show
     val hintToPlay = rememberSaveable { mutableStateOf("") }
-
+    // Echo text to show
     val echoString = rememberSaveable { mutableStateOf("") }
+    // Echo text alpha value
     val echoStringAlpha = rememberSaveable { mutableFloatStateOf(0f) }
+    /**
+     * Echo animation execute
+     */
     val playEchoAnim: (text: String) -> Unit = {
         displayEchoAnim(it, echoString, echoStringAlpha)
     }
-
+    // Button to anim
     val buttonToDisplay: MutableState<Int?> = rememberSaveable {
         mutableStateOf(null)
     }
-
+    // Observe timer in case it ended
     timerVM.timerEnded.observe(context as ComponentActivity) {
         if (it) {
             vm.postNewGameState(GameState.GameOver)
         }
     }
-
+    // Actual time remaining value
     var gameTimer by rememberSaveable { mutableLongStateOf(0L) }
+    // Observe timer to change game timer
     timerVM.actualTimeRemaining.observe(context) {
         if (it != gameTimer)
             gameTimer = it
     }
-
+    // Actual game state
     var gameState by rememberSaveable { mutableStateOf(GameState.NotStarted) }
+    // Check if the game state has changed
     var gamStateChanged by rememberSaveable { mutableStateOf(false) }
+    // Observe game state
     vm.gameState.observe(context) {
         if (gameState != it && !gamStateChanged)
             gameState = it
         gamStateChanged = true
-        println("GAME STATE = $it")
     }
+    // In case the game state has changed
     if (gamStateChanged) {
         gamStateChanged = false
         when (gameState) {
             GameState.NotStarted -> {
                 hintToPlay.value = "NOT STARTED YET WAIT PLEASE!"
-
                 vm.startNewGame(
                     LEVEL_LEN_INITIAL_SEQUENCE_STEPS[difficulty - 1],
                     4
                 )
             }
-
             GameState.Pause -> {
                 hintToPlay.value = "DON'T MOVE"
-
                 timerVM.stopTimer()
             }
-
             GameState.ContinuePlaying -> {
                 playEchoAnim("Continue Playing...")
-
                 vm.postNewGameState(GameState.Showing)
             }
-
             GameState.ListeningStep -> {
                 hintToPlay.value = "YOUR TURN!"
             }
-
             GameState.NextStep -> {
                 playEchoAnim("GREAT MOVE!")
-
                 timerVM.stopTimer()
                 timerVM.startNewTimer(
                     (LEVEL_MAX_RESPONSE_TIME_SEC[difficulty - 1] * 1000).toLong()
                 )
                 vm.postNewGameState(GameState.ListeningStep)
             }
-
             GameState.Showing -> {
                 playEchoAnim("It's my turn")
                 hintToPlay.value = "WATCH THE MOVES..."
-
                 timerVM.stopTimer()
                 timerVM.actualTimeRemaining.postValue((LEVEL_MAX_RESPONSE_TIME_SEC[difficulty - 1] * 1000).toLong())
                 showSequence(
@@ -162,21 +164,21 @@ fun PlayGameState(
                     context
                 )
             }
-
             GameState.GameOver -> {
                 playEchoAnim("GAME OVER")
                 hintToPlay.value = "GAME OVER"
-
                 timerVM.stopTimer()
                 onclick(vm.sequence.value!!.size)
             }
         }
     }
+    // Display the upper menu layout if the game is not in pause
     if (gameState != GameState.Pause) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            // Back button
             Box(
                 modifier = Modifier
                     .size(300.dp)
@@ -193,6 +195,7 @@ fun PlayGameState(
                     Text(text = "◀")
                 }
             }
+            // Pause button
             Box(
                 modifier = Modifier
                     .size(300.dp)
@@ -206,32 +209,38 @@ fun PlayGameState(
             }
         }
     }
-
+    // Game layout
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         if (gameState == GameState.Pause) {
+            // Pause screen
             PauseScreen(context, vm)
         } else {
+            // Game screen
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                // Display time remaining
                 Text(
                     text = String.format(Locale.US, "TIME REMAINING (s) = %.3f", gameTimer / 1000f),
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
+                // Display echo text
                 Text(
                     text = echoString.value,
                     fontSize = 10.sp,
                     modifier = Modifier.alpha(echoStringAlpha.floatValue),
                     color = MaterialTheme.colorScheme.primary
                 )
+                // Display the hint text
                 Text(text = hintToPlay.value, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                // Display the simon buttons layout
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -253,6 +262,9 @@ fun PlayGameState(
     }
 }
 
+/**
+ * Pause screen layout
+ */
 @Composable
 private fun PauseScreen(context: Context, vm: GameViewModel) {
     Column(
@@ -260,13 +272,14 @@ private fun PauseScreen(context: Context, vm: GameViewModel) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Pause text
         Text(
             "GAME\n\n\n\nPAUSED",
             fontSize = 60.sp,
             modifier = Modifier.padding(50.dp),
             color = MaterialTheme.colorScheme.primary,
         )
-
+        // Exit button
         Button(modifier = Modifier.padding(20.dp),
             onClick = {
                 confirmExitDialog(context, ConfirmExitDialogInformationGame,
@@ -277,17 +290,19 @@ private fun PauseScreen(context: Context, vm: GameViewModel) {
             }) {
             Text(text = "EXIT")
         }
-
+        // Resume button
         Button(modifier = Modifier.padding(20.dp),
             onClick = {
                 pauseGame(vm)
             }) {
             Text(text = "RESUME")
         }
-
     }
 }
 
+/**
+ * Simon button layout
+ */
 @Composable
 fun SimonButtonLayout(
     vm: GameViewModel,
@@ -305,6 +320,7 @@ fun SimonButtonLayout(
             .width(200.dp),
         colors = ButtonDefaults.buttonColors(Color.Transparent)
     ) {
+        // Display the simon button image
         Image(
             painter = painterResource(id =
             SimonButtonShapeIcons[
@@ -319,6 +335,9 @@ fun SimonButtonLayout(
     }
 }
 
+/**
+ * Action when a simon button is pressed
+ */
 private fun simonButtonPressed(
     vm: GameViewModel,
     buttonId: Int,
@@ -331,6 +350,9 @@ private fun simonButtonPressed(
     }
 }
 
+/**
+ * Pause game function
+ */
 private fun pauseGame(vm: GameViewModel) {
     if (vm.gameState.value == GameState.Pause) {
         vm.postNewGameState(GameState.ContinuePlaying)
@@ -338,6 +360,10 @@ private fun pauseGame(vm: GameViewModel) {
         vm.postNewGameState(GameState.Pause)
     }
 }
+
+/**
+ * Play sound depending on the button ID function
+ */
 fun playSound(context: Context, soundResId: Int) {
     val currentSoundVolume = GameActivity.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100)
     val value = currentSoundVolume.toFloat()
@@ -349,6 +375,10 @@ fun playSound(context: Context, soundResId: Int) {
         it.release()
     }
 }
+
+/**
+ * Anim button function
+ */
 private fun animButton(
     buttonToDisplay: MutableState<Int?>,
     buttonId: Int,
@@ -363,8 +393,10 @@ private fun animButton(
     }
 }
 
+/**
+ * Show sequence in background coroutine
+ */
 private fun showSequence(vm: GameViewModel, timeToShowStep: Float, buttonToDisplay: MutableState<Int?>, context: Context) {
-    println("Showing sequence: ${vm.sequence.value}")
     val timeToWaitBetween =  (timeToShowStep/2 * 1000).toLong()
     CoroutineScope(Dispatchers.Default).launch {
         for (i in vm.sequence.value!!) {
