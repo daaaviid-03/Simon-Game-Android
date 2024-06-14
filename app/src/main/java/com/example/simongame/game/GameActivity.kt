@@ -21,6 +21,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simongame.ConfirmExitDialogInformationEndGame
 import com.example.simongame.ConfirmExitDialogInformationGame
+import com.example.simongame.LEVEL_LEN_INITIAL_SEQUENCE_STEPS
 import com.example.simongame.MusicManager
 import com.example.simongame.confirmExitDialog
 import com.example.simongame.db.DBViewModel
@@ -125,7 +126,7 @@ fun BackgroundLayout(
         1 -> {
             // Displays the actual game screen
             PlayGameState(context, vm, timerVM, difficulty) {
-                sequenceLen = it
+                sequenceLen = it - LEVEL_LEN_INITIAL_SEQUENCE_STEPS[difficulty - 1]
                 GameActivity.state = 2
                 state = 2
             }

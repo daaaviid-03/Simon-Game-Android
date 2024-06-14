@@ -225,6 +225,12 @@ fun PlayGameState(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                // Display the actual step level
+                Text(
+                    text = "STEPS COMPLETED = ${vm.sequence.value!!.size - LEVEL_LEN_INITIAL_SEQUENCE_STEPS[difficulty - 1]}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
                 // Display time remaining
                 Text(
                     text = String.format(Locale.US, "TIME REMAINING (s) = %.3f", gameTimer / 1000f),
