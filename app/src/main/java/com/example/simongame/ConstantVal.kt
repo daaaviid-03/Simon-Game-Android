@@ -47,15 +47,16 @@ fun invertColor(color: Color): Color {
     return Color(red, green, blue)
 }
 
-fun confirmExitDialog(context: Context, information: String, extraFunction: () -> Unit = {}) {
+fun confirmExitDialog(context: Context, information: String, extraFunctionToCancel: () -> Unit = {}, extraFunctionToExit: () -> Unit = {}) {
     val builder = AlertDialog.Builder(context)
     builder.setTitle("Confirm Action")
     builder.setMessage(information)
     builder.setPositiveButton("Exit") { _, _ ->
+        extraFunctionToExit()
         exitThisActivity(context)
     }
     builder.setNegativeButton("Cancel Exit") { dialog, _ ->
-        extraFunction()
+        extraFunctionToCancel()
         dialog.cancel()
     }
     val dialog = builder.create()

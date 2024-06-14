@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simongame.ConfirmExitDialogInformationEndGame
 import com.example.simongame.ConfirmExitDialogInformationGame
 import com.example.simongame.MainActivity
+import com.example.simongame.MusicManager
 import com.example.simongame.confirmExitDialog
 import com.example.simongame.db.DBViewModel
 import com.example.simongame.db.DBViewModelFactory
@@ -32,6 +33,7 @@ class GameActivity : ComponentActivity() {
     companion object {
         var state: Int = 0
         lateinit var sharedPreferences: SharedPreferences
+        lateinit var vm: GameViewModel
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +55,7 @@ class GameActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
 
-            val vm: GameViewModel = viewModel(
+            vm = viewModel(
                 factory = GameViewModelFactory(context.applicationContext as Application))
 
             val timerVM: GameCountDownTimerViewModel = viewModel(
@@ -73,20 +75,15 @@ class GameActivity : ComponentActivity() {
             }
         }
     }
-    override fun onResume() {
-        super.onResume()
-        MainActivity.ActivityCounter.count++
-        if (MainActivity.ActivityCounter.count == 1) {
-            MainActivity.MediaPlayerManager.mediaPlayer?.start()
-            MainActivity.MediaPlayerManager.mediaPlayer?.isLooping
-        }
-    }
+
     override fun onPause() {
         super.onPause()
-        MainActivity.ActivityCounter.count--
-        if (MainActivity.ActivityCounter.count == 0) {
-            MainActivity.MediaPlayerManager.mediaPlayer?.pause()
-        }
+        MusicManager.pauseMusic()
+        vm.postNewGameState(GameState.Pause)
+    }
+    override fun onResume() {
+        super.onResume()
+        MusicManager.resumeMusic()
     }
 }
 

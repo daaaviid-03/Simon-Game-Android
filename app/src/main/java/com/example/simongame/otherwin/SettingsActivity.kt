@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.example.simongame.BOARD_SHAPE_INDEX_KEY
 import com.example.simongame.ConfirmExitDialogInformationSettings
 import com.example.simongame.MUSIC_LEVEL_KEY
-import com.example.simongame.MainActivity
+import com.example.simongame.MusicManager
 import com.example.simongame.SOUND_LEVEL_KEY
 import com.example.simongame.SimonButtonShapeIcons
 import com.example.simongame.SimonColorRed
@@ -58,26 +58,19 @@ class SettingsActivity : ComponentActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        MainActivity.ActivityCounter.count++
-        if (MainActivity.ActivityCounter.count == 1) {
-            MainActivity.MediaPlayerManager.mediaPlayer?.start()
-            MainActivity.MediaPlayerManager.mediaPlayer?.isLooping
-        }
-    }
     override fun onPause() {
         super.onPause()
-        MainActivity.ActivityCounter.count--
-        if (MainActivity.ActivityCounter.count == 0) {
-            MainActivity.MediaPlayerManager.mediaPlayer?.pause()
-        }
+        MusicManager.pauseMusic()
+    }
+    override fun onResume() {
+        super.onResume()
+        MusicManager.resumeMusic()
     }
 }
 
 @Composable
 fun Background(context: Context,) {
-    val mediaPlayer = MainActivity.MediaPlayerManager.mediaPlayer
+//    val mediaPlayer = MainActivity.MediaPlayerManager.mediaPlayer
     val boardShapes = SimonButtonShapeIcons
 
     val boardShapeIndex: MutableIntState = remember {
@@ -99,12 +92,13 @@ fun Background(context: Context,) {
 
     Column {
         UpperBarControl(context, "Settings") {
-            confirmExitDialog(context, ConfirmExitDialogInformationSettings) {
-                // Don't save preferences for music level
-                val volumeFloat = SettingsActivity.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100) / 100.0f
-                mediaPlayer?.setVolume(volumeFloat, volumeFloat)
-                exitThisActivity(context)
-            }
+            confirmExitDialog(context, ConfirmExitDialogInformationSettings,
+                extraFunctionToExit =  {
+                    // Don't save preferences for music level
+                    val lastMusicVolumeLevel = SettingsActivity.sharedPreferences.getInt(SOUND_LEVEL_KEY, 100) / 100.0f
+                    MusicManager.setVolume(lastMusicVolumeLevel)
+                }
+            )
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -116,7 +110,8 @@ fun Background(context: Context,) {
                 onValueChange = { newVolume ->
                     currentMusicVolume.intValue = newVolume.toInt()
                     val volumeFloat = newVolume / 100.0f
-                    mediaPlayer?.setVolume(volumeFloat, volumeFloat)
+//                    mediaPlayer?.setVolume(volumeFloat, volumeFloat)
+                    MusicManager.setVolume(volumeFloat)
                 },
                 valueRange = 0f..100f,
                 steps = 100

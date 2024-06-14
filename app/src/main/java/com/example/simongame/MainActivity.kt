@@ -39,18 +39,9 @@ import com.example.simongame.otherwin.SettingsActivity
 import com.example.simongame.ui.theme.SimonGameTheme
 
 class MainActivity : ComponentActivity() {
-    object MediaPlayerManager {
-        var mediaPlayer: MediaPlayer? = null
-    }
-    object ActivityCounter {
-        var count = 0
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MediaPlayerManager.mediaPlayer = MediaPlayer.create(this, R.raw.audio).apply {
-            isLooping = true
-            start()
-        }
+        MusicManager.startMusic(this)
         setContent {
             val context = LocalContext.current
 
@@ -66,23 +57,16 @@ class MainActivity : ComponentActivity() {
     }
     override fun onDestroy() {
         super.onDestroy()
-        MediaPlayerManager.mediaPlayer?.release()
+        MusicManager.stopMusic()
     }
 
     override fun onPause() {
         super.onPause()
-        ActivityCounter.count--
-        if (ActivityCounter.count == 0) {
-            MediaPlayerManager.mediaPlayer?.pause()
-        }
+        MusicManager.pauseMusic()
     }
     override fun onResume() {
         super.onResume()
-        ActivityCounter.count++
-        if (ActivityCounter.count == 1) {
-            MediaPlayerManager.mediaPlayer?.start()
-            MediaPlayerManager.mediaPlayer?.isLooping
-        }
+        MusicManager.resumeMusic()
     }
 
 }

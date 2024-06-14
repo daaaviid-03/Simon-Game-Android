@@ -184,9 +184,11 @@ fun PlayGameState(
             ) {
                 Button(onClick = {
                     vm.postNewGameState(GameState.Pause)
-                    confirmExitDialog(context, ConfirmExitDialogInformationGame) {
-                        vm.postNewGameState(GameState.ContinuePlaying)
-                    }
+                    confirmExitDialog(context, ConfirmExitDialogInformationGame,
+                        extraFunctionToCancel = {
+                            vm.postNewGameState(GameState.ContinuePlaying)
+                        }
+                    )
                 }) {
                     Text(text = "◀")
                 }
@@ -253,31 +255,36 @@ fun PlayGameState(
 
 @Composable
 private fun PauseScreen(context: Context, vm: GameViewModel) {
-    Column{
-        UpperBarControl(context, "") {
-            confirmExitDialog(context, ConfirmExitDialogInformationGame){
-                vm.postNewGameState(GameState.ContinuePlaying)
-            }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            "GAME\n\n\n\nPAUSED",
+            fontSize = 60.sp,
+            modifier = Modifier.padding(50.dp),
+            color = MaterialTheme.colorScheme.primary,
+        )
+
+        Button(modifier = Modifier.padding(20.dp),
+            onClick = {
+                confirmExitDialog(context, ConfirmExitDialogInformationGame,
+                    extraFunctionToCancel = {
+                        vm.postNewGameState(GameState.ContinuePlaying)
+                    }
+                )
+            }) {
+            Text(text = "EXIT")
         }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                "GAME\n\n\n\nPAUSED",
-                fontSize = 60.sp,
-                modifier = Modifier.padding(50.dp),
-                color = Color.White
-            )
-            Button(onClick = {
+
+        Button(modifier = Modifier.padding(20.dp),
+            onClick = {
                 pauseGame(vm)
             }) {
-                Text(text = "Continue Playing")
-            }
+            Text(text = "RESUME")
         }
+
     }
 }
 
