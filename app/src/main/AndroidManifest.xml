@@ -14,16 +14,28 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.SimonGame">
+            android:theme="@style/Theme.SimonGame"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".game.GameActivity" />
-        <activity android:name=".otherwin.SettingsActivity" />
-        <activity android:name=".otherwin.HighScoresActivity" />
+        <activity
+            android:name=".game.GameActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+        <activity
+            android:name=".otherwin.SettingsActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity"/>
+        <activity
+            android:name=".otherwin.HighScoresActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity"/>
+
     </application>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"
         tools:ignore="ManifestOrder" />
